@@ -77,11 +77,14 @@ void main() {
     Get.put<PuzzleImageLoader>(const _FakePuzzleImageLoader(), permanent: true);
     controller = Get.put(PuzzleGameController(), permanent: true);
 
-    for (int i = 0; i < 10; i++) {
-      if (controller.selectedLevel.value != null) {
+    for (int i = 0; i < 100; i++) {
+      if (controller.isInitialized.value &&
+          controller.selectedLevel.value != null &&
+          controller.imageAsync.value != null &&
+          controller.tiles.isNotEmpty) {
         break;
       }
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+      await Future<void>.delayed(const Duration(milliseconds: 2));
     }
   });
 
@@ -124,37 +127,82 @@ void main() {
   });
 
   test('moveClusterFromDrag handles overlapping downward shift', () {
-    controller.tiles.assignAll(List<int>.generate(24, (i) => i));
+    final int total = controller.rowCount * controller.columnCount;
+    final int below = controller.columnCount;
+    final int twoBelow = controller.columnCount * 2;
+
+    controller.tiles.assignAll(List<int>.generate(total, (i) => i));
     controller.clusterIdToBoardIndices.assignAll(<int, List<int>>{
-      9: <int>[0, 4],
+      9: <int>[0, below],
     });
 
     controller.moveClusterFromDrag(
       clusterId: 9,
       fromAnchorIndex: 0,
-      toAnchorIndex: 4,
+      toAnchorIndex: below,
     );
 
-    expect(controller.tiles[4], 0);
-    expect(controller.tiles[8], 4);
-    expect(controller.tiles[0], 8);
+    expect(controller.tiles[below], 0);
+    expect(controller.tiles[twoBelow], below);
+    expect(controller.tiles[0], twoBelow);
   });
 
-  test('moveClusterFromDrag handles overlapping right shift', () {
-    controller.tiles.assignAll(List<int>.generate(24, (i) => i));
+  test('moveClusterFromDrag handles overlapping shift', () {
+    final int total = controller.rowCount * controller.columnCount;
+
+    controller.tiles.assignAll(List<int>.generate(total, (i) => i));
+
+    if (controller.columnCount >= 3) {
+      controller.clusterIdToBoardIndices.assignAll(<int, List<int>>{
+        10: <int>[0, 1],
+      });
+
+      expect(
+        controller.canAcceptClusterDrop(
+          clusterId: 10,
+          fromAnchorIndex: 0,
+          toAnchorIndex: 1,
+        ),
+        isTrue,
+      );
+
+      controller.moveClusterFromDrag(
+        clusterId: 10,
+        fromAnchorIndex: 0,
+        toAnchorIndex: 1,
+      );
+
+      expect(controller.tiles[1], 0);
+      expect(controller.tiles[2], 1);
+      expect(controller.tiles[0], 2);
+      return;
+    }
+
+    final int below = controller.columnCount;
+    final int twoBelow = controller.columnCount * 2;
+
     controller.clusterIdToBoardIndices.assignAll(<int, List<int>>{
-      10: <int>[0, 1],
+      10: <int>[1, 1 + below],
     });
+
+    expect(
+      controller.canAcceptClusterDrop(
+        clusterId: 10,
+        fromAnchorIndex: 1,
+        toAnchorIndex: 1 + below,
+      ),
+      isTrue,
+    );
 
     controller.moveClusterFromDrag(
       clusterId: 10,
-      fromAnchorIndex: 0,
-      toAnchorIndex: 1,
+      fromAnchorIndex: 1,
+      toAnchorIndex: 1 + below,
     );
 
-    expect(controller.tiles[1], 0);
-    expect(controller.tiles[2], 1);
-    expect(controller.tiles[0], 2);
+    expect(controller.tiles[1 + below], 1);
+    expect(controller.tiles[1 + twoBelow], 1 + below);
+    expect(controller.tiles[1], 1 + twoBelow);
   });
 
   test('startDrag and endDrag update drag state', () {
@@ -230,6 +278,32 @@ void main() {
     expect(controller.isSolved.value, isFalse);
   });
 
+  test('resetLevelProgress restores default unlock state', () async {
+    final int total = controller.rowCount * controller.columnCount;
+    final List<int> almostSolved = List<int>.generate(total, (i) => i);
+    almostSolved[0] = 1;
+    almostSolved[1] = 0;
+    controller.tiles.assignAll(almostSolved);
+
+    controller.swapTiles(0, 1);
+    await Future<void>.delayed(const Duration(milliseconds: 1));
+
+    expect(controller.isLevelCompleted(AppConfig.defaultLevelId), isTrue);
+
+    await controller.resetLevelProgress();
+
+    expect(controller.selectedLevel.value?.id, AppConfig.defaultLevelId);
+    expect(controller.suggestedNextLevelId.value, isNull);
+    expect(controller.completedLevelIds, isEmpty);
+    expect(controller.unlockedLevelIds, <String>[AppConfig.defaultLevelId]);
+
+    expect(_FakeLevelProgressStorage.selectedLevelId, AppConfig.defaultLevelId);
+    expect(_FakeLevelProgressStorage.unlockedLevelIds, <String>[
+      AppConfig.defaultLevelId,
+    ]);
+    expect(_FakeLevelProgressStorage.completedLevelIds, isEmpty);
+  });
+
   test('sanitizes persisted level progress against catalog changes', () async {
     Get.reset();
     _FakeLevelProgressStorage.resetStore();
@@ -256,11 +330,14 @@ void main() {
       permanent: true,
     );
 
-    for (int i = 0; i < 10; i++) {
-      if (sanitizedController.selectedLevel.value != null) {
+    for (int i = 0; i < 100; i++) {
+      if (sanitizedController.isInitialized.value &&
+          sanitizedController.selectedLevel.value != null &&
+          sanitizedController.imageAsync.value != null &&
+          sanitizedController.tiles.isNotEmpty) {
         break;
       }
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+      await Future<void>.delayed(const Duration(milliseconds: 2));
     }
 
     expect(

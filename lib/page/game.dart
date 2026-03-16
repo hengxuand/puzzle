@@ -74,55 +74,18 @@ class _GamePageState extends State<GamePage> {
                       ),
                     ),
                   ),
-                  Visibility(
-                    visible: gameController.isSolved.value,
-                    maintainState: true,
-                    maintainAnimation: true,
-                    maintainSize: true,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0x1A2E7D32),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0x552E7D32)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Great job! You solved it.',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: Colors.green[800],
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            if (gameController.suggestedNextLevelName != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  'Unlocked: ${gameController.suggestedNextLevelName}',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.green[900],
-                                  ),
-                                ),
-                              ),
-                            if (gameController.suggestedNextLevelName != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 10),
-                                child: ElevatedButton.icon(
-                                  onPressed: () async {
-                                    await gameController
-                                        .playSuggestedNextLevel();
-                                  },
-                                  icon: const Icon(Icons.skip_next),
-                                  label: const Text('Play Next Level'),
-                                ),
-                              ),
-                          ],
-                        ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ElevatedButton.icon(
+                        onPressed: gameController.isSolved.value
+                            ? () async {
+                                await gameController.playSuggestedNextLevel();
+                              }
+                            : null,
+                        icon: const Icon(Icons.skip_next),
+                        label: const Text('Play Next Level'),
                       ),
                     ),
                   ),

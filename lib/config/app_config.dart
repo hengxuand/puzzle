@@ -75,18 +75,18 @@ class PuzzleDifficulty {
 
   static const PuzzleDifficulty easiest = PuzzleDifficulty._(
     label: 'Easy',
-    rows: 6,
-    columns: 4,
+    rows: 3,
+    columns: 2,
   );
   static const PuzzleDifficulty mid = PuzzleDifficulty._(
     label: 'Medium',
-    rows: 7,
-    columns: 5,
+    rows: 3,
+    columns: 2,
   );
   static const PuzzleDifficulty hardest = PuzzleDifficulty._(
     label: 'Hard',
-    rows: 8,
-    columns: 6,
+    rows: 3,
+    columns: 2,
   );
 
   String get displaySize => '${rows}x$columns';

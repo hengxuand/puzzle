@@ -49,6 +49,35 @@ class WelcomePage extends StatelessWidget {
                   child: Text('Start Game', style: TextStyle(fontSize: 18)),
                 ),
               ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () async {
+                  final bool? confirmed = await Get.dialog<bool>(
+                    AlertDialog(
+                      title: const Text('Reset Level Progress?'),
+                      content: const Text(
+                        'This will clear completed levels and lock all levels except the first one.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(result: false),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () => Get.back(result: true),
+                          child: const Text('Reset'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirmed == true) {
+                    await controller.resetLevelProgress();
+                  }
+                },
+                icon: const Icon(Icons.restart_alt),
+                label: const Text('Reset Levels'),
+              ),
               const SizedBox(height: 32),
             ],
           ),

@@ -16,6 +16,7 @@ class PuzzleGameController extends GetxController {
       Get.find<LevelProgressStorage>();
 
   final Rx<PuzzleDifficulty> difficulty = AppConfig.defaultDifficulty.obs;
+  final RxBool isInitialized = false.obs;
   final Rxn<GameLevel> selectedLevel = Rxn<GameLevel>();
   final RxList<String> unlockedLevelIds = <String>[].obs;
   final RxList<String> completedLevelIds = <String>[].obs;
@@ -39,6 +40,7 @@ class PuzzleGameController extends GetxController {
   void onInit() {
     super.onInit();
     _log.fine('onInit called');
+    isInitialized.value = false;
     _initializeLevelState();
   }
 
@@ -93,6 +95,7 @@ class PuzzleGameController extends GetxController {
 
     await _progressStorage.saveUnlockedLevelIds(unlockedLevelIds.toList());
     await _progressStorage.saveCompletedLevelIds(completedLevelIds.toList());
+    isInitialized.value = true;
   }
 
   List<String> _sanitizeProgressIds({
@@ -416,6 +419,20 @@ class PuzzleGameController extends GetxController {
     }
 
     await _applyLevel(level, persistSelection: true, reshuffle: true);
+  }
+
+  Future<void> resetLevelProgress() async {
+    final GameLevel defaultLevel =
+        _levelById(AppConfig.defaultLevelId) ?? AppConfig.levels.first;
+
+    suggestedNextLevelId.value = null;
+    completedLevelIds.clear();
+    unlockedLevelIds.assignAll(<String>[defaultLevel.id]);
+
+    await _applyLevel(defaultLevel, persistSelection: false, reshuffle: true);
+    await _progressStorage.saveSelectedLevel(defaultLevel.id);
+    await _progressStorage.saveUnlockedLevelIds(unlockedLevelIds.toList());
+    await _progressStorage.saveCompletedLevelIds(completedLevelIds.toList());
   }
 
   GameLevel? _nextLevel(GameLevel level) {
