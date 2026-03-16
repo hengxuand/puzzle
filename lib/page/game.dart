@@ -74,7 +74,7 @@ class _GamePageState extends State<GamePage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 24),
                   Row(
                     children: [
                       Expanded(
@@ -93,7 +93,7 @@ class _GamePageState extends State<GamePage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 48),
                       Expanded(
                         child: SizedBox(
                           height: 52,
@@ -111,6 +111,7 @@ class _GamePageState extends State<GamePage> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 24),
                 ],
               );
             }),

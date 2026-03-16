@@ -408,6 +408,7 @@ class PuzzleGameController extends GetxController {
 
   Future<void> playSuggestedNextLevel() async {
     final String? id = suggestedNextLevelId.value;
+    _log.fine('Attempting to play suggested next level: $id');
     if (id == null) {
       return;
     }
@@ -419,6 +420,7 @@ class PuzzleGameController extends GetxController {
     }
 
     await _applyLevel(level, persistSelection: true, reshuffle: true);
+    _log.fine('Successfully started suggested next level: $id');
   }
 
   Future<void> resetLevelProgress() async {
