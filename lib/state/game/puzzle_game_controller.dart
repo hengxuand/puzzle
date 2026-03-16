@@ -415,11 +415,7 @@ class PuzzleGameController extends GetxController {
       return;
     }
 
-    await _applyLevel(
-      level,
-      persistSelection: true,
-      reshuffle: true,
-    );
+    await _applyLevel(level, persistSelection: true, reshuffle: true);
   }
 
   GameLevel? _nextLevel(GameLevel level) {

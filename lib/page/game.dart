@@ -114,7 +114,8 @@ class _GamePageState extends State<GamePage> {
                                 padding: const EdgeInsets.only(top: 10),
                                 child: ElevatedButton.icon(
                                   onPressed: () async {
-                                    await gameController.playSuggestedNextLevel();
+                                    await gameController
+                                        .playSuggestedNextLevel();
                                   },
                                   icon: const Icon(Icons.skip_next),
                                   label: const Text('Play Next Level'),
@@ -131,7 +132,8 @@ class _GamePageState extends State<GamePage> {
                     children: [
                       ElevatedButton(
                         onPressed: () async {
-                          await gameController.applySuggestedLevelSelectionForMenu();
+                          await gameController
+                              .applySuggestedLevelSelectionForMenu();
                           Get.offAll(() => const WelcomePage());
                         },
                         child: const Padding(

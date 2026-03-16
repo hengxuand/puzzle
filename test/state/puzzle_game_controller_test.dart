@@ -196,19 +196,22 @@ void main() {
     expect(controller.suggestedNextLevelId.value, 'level_2');
   });
 
-  test('applySuggestedLevelSelectionForMenu selects unlocked next level', () async {
-    final List<int> almostSolved = List<int>.generate(24, (i) => i);
-    almostSolved[0] = 1;
-    almostSolved[1] = 0;
-    controller.tiles.assignAll(almostSolved);
-    controller.swapTiles(0, 1);
+  test(
+    'applySuggestedLevelSelectionForMenu selects unlocked next level',
+    () async {
+      final List<int> almostSolved = List<int>.generate(24, (i) => i);
+      almostSolved[0] = 1;
+      almostSolved[1] = 0;
+      controller.tiles.assignAll(almostSolved);
+      controller.swapTiles(0, 1);
 
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-    await controller.applySuggestedLevelSelectionForMenu();
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      await controller.applySuggestedLevelSelectionForMenu();
 
-    expect(controller.selectedLevel.value?.id, 'level_2');
-    expect(controller.suggestedNextLevelId.value, isNull);
-  });
+      expect(controller.selectedLevel.value?.id, 'level_2');
+      expect(controller.suggestedNextLevelId.value, isNull);
+    },
+  );
 
   test('playSuggestedNextLevel starts the next level immediately', () async {
     final List<int> almostSolved = List<int>.generate(24, (i) => i);
@@ -265,10 +268,15 @@ void main() {
       containsAll(<String>['level_1', 'level_2']),
     );
     expect(
-      sanitizedController.unlockedLevelIds.where((id) => id == 'level_1').length,
+      sanitizedController.unlockedLevelIds
+          .where((id) => id == 'level_1')
+          .length,
       1,
     );
-    expect(sanitizedController.unlockedLevelIds.contains('removed_level'), isFalse);
+    expect(
+      sanitizedController.unlockedLevelIds.contains('removed_level'),
+      isFalse,
+    );
     expect(sanitizedController.selectedLevel.value?.id, 'level_1');
   });
 }
