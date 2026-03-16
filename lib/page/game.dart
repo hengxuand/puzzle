@@ -74,39 +74,38 @@ class _GamePageState extends State<GamePage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: ElevatedButton.icon(
-                        onPressed: gameController.isSolved.value
-                            ? () async {
-                                await gameController.playSuggestedNextLevel();
-                              }
-                            : null,
-                        icon: const Icon(Icons.skip_next),
-                        label: const Text('Play Next Level'),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 12),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          await gameController
-                              .applySuggestedLevelSelectionForMenu();
-                          Get.offAll(() => const WelcomePage());
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
+                      Expanded(
+                        child: SizedBox(
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await gameController
+                                  .applySuggestedLevelSelectionForMenu();
+                              Get.offAll(() => const WelcomePage());
+                            },
+                            child: const Text(
+                              'Go Back',
+                              style: TextStyle(fontSize: 18),
+                            ),
                           ),
-                          child: Text(
-                            'Go Back',
-                            style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 52,
+                          child: ElevatedButton.icon(
+                            onPressed: gameController.isSolved.value
+                                ? () async {
+                                    await gameController
+                                        .playSuggestedNextLevel();
+                                  }
+                                : null,
+                            icon: const Icon(Icons.skip_next),
+                            label: const Text('Play Next Level'),
                           ),
                         ),
                       ),
