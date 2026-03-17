@@ -12,6 +12,7 @@ class WelcomePage extends StatelessWidget {
     final PuzzleGameController controller = Get.find<PuzzleGameController>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F6FA),
       body: Center(
         child: Obx(
           () => Column(
@@ -24,17 +25,14 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Choose a level',
+                'Choose a group, then a level',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: ListView(
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  children: [
-                    for (final GameLevel level in AppConfig.levels)
-                      _LevelCard(level: level, controller: controller),
-                  ],
+                  child: _GroupedLevelSelector(controller: controller),
                 ),
               ),
               const SizedBox(height: 16),
@@ -87,6 +85,67 @@ class WelcomePage extends StatelessWidget {
   }
 }
 
+class _GroupedLevelSelector extends StatelessWidget {
+  const _GroupedLevelSelector({required this.controller});
+
+  final PuzzleGameController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<LevelGroup> groups = controller.groups;
+    if (groups.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final String selectedGroupId =
+        controller.selectedGroupId.value ?? groups.first.id;
+    final List<GameLevel> levels = controller.levelsForGroup(selectedGroupId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 70,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              final LevelGroup group = groups[index];
+              final bool isSelected = selectedGroupId == group.id;
+              return ChoiceChip(
+                selected: isSelected,
+                label: Text(group.name),
+                onSelected: (_) {
+                  controller.setSelectedGroup(group.id);
+                },
+              );
+            },
+            separatorBuilder: (_, index) => const SizedBox(width: 8),
+            itemCount: groups.length,
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (final LevelGroup group in groups)
+          if (group.id == selectedGroupId)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                group.description,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+        Expanded(
+          child: ListView(
+            children: [
+              for (final GameLevel level in levels)
+                _LevelCard(level: level, controller: controller),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _LevelCard extends StatelessWidget {
   const _LevelCard({required this.level, required this.controller});
 
@@ -98,11 +157,15 @@ class _LevelCard extends StatelessWidget {
     final bool isUnlocked = controller.isLevelUnlocked(level.id);
     final bool isCompleted = controller.isLevelCompleted(level.id);
     final bool isSelected = controller.selectedLevel.value?.id == level.id;
+    final BorderRadius cardBorderRadius = BorderRadius.circular(12);
 
     return Card(
-      elevation: isSelected ? 6 : 2,
+      elevation: isSelected ? 12 : 0,
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: cardBorderRadius),
       child: InkWell(
+        borderRadius: cardBorderRadius,
         onTap: isUnlocked
             ? () {
                 controller.selectLevel(level);
@@ -140,7 +203,7 @@ class _LevelCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${level.name} (${level.difficulty.displaySize})',
+                      '${level.name} (Easy ${level.difficulty.displaySize})',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isUnlocked ? null : Colors.grey,

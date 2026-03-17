@@ -18,6 +18,7 @@ class PuzzleGameController extends GetxController {
   final Rx<PuzzleDifficulty> difficulty = AppConfig.defaultDifficulty.obs;
   final RxBool isInitialized = false.obs;
   final Rxn<GameLevel> selectedLevel = Rxn<GameLevel>();
+  final RxnString selectedGroupId = RxnString();
   final RxList<String> unlockedLevelIds = <String>[].obs;
   final RxList<String> completedLevelIds = <String>[].obs;
   final RxnString suggestedNextLevelId = RxnString();
@@ -56,9 +57,12 @@ class PuzzleGameController extends GetxController {
       ids: snapshot.completedLevelIds,
       validLevelIds: validLevelIds,
     );
+    final List<String> defaultUnlocked = _defaultUnlockedLevelIds();
 
-    if (!unlocked.contains(AppConfig.defaultLevelId)) {
-      unlocked.insert(0, AppConfig.defaultLevelId);
+    for (final String levelId in defaultUnlocked) {
+      if (!unlocked.contains(levelId)) {
+        unlocked.add(levelId);
+      }
     }
 
     for (final String completedId in completed) {
@@ -83,7 +87,7 @@ class PuzzleGameController extends GetxController {
 
     if (initialLevel == null) {
       initialLevel = AppConfig.levels.first;
-      unlockedLevelIds.assignAll(<String>[initialLevel.id]);
+      unlockedLevelIds.assignAll(defaultUnlocked);
       await _progressStorage.saveUnlockedLevelIds(unlockedLevelIds.toList());
     }
 
@@ -119,9 +123,7 @@ class PuzzleGameController extends GetxController {
   }
 
   void _sortLevelIdsByOrder(List<String> ids) {
-    final Map<String, int> orderById = <String, int>{
-      for (final GameLevel level in AppConfig.levels) level.id: level.order,
-    };
+    final Map<String, int> orderById = AppConfig.levelSortOrderById;
 
     ids.sort((a, b) {
       final int orderA = orderById[a] ?? 1 << 20;
@@ -131,12 +133,50 @@ class PuzzleGameController extends GetxController {
   }
 
   List<GameLevel> get levels => AppConfig.levels;
+  List<LevelGroup> get groups => AppConfig.levelGroups;
+
+  List<GameLevel> levelsForGroup(String groupId) {
+    return AppConfig.levels.where((level) => level.groupId == groupId).toList()
+      ..sort((a, b) => a.orderInGroup.compareTo(b.orderInGroup));
+  }
+
+  Future<void> setSelectedGroup(String groupId) async {
+    if (selectedGroupId.value == groupId) {
+      return;
+    }
+
+    selectedGroupId.value = groupId;
+
+    final List<GameLevel> groupLevels = levelsForGroup(groupId);
+    if (groupLevels.isEmpty) {
+      return;
+    }
+
+    final GameLevel? selected = selectedLevel.value;
+    if (selected != null && selected.groupId == groupId) {
+      return;
+    }
+
+    GameLevel? firstUnlocked;
+    for (final GameLevel level in groupLevels) {
+      if (isLevelUnlocked(level.id)) {
+        firstUnlocked = level;
+        break;
+      }
+    }
+
+    if (firstUnlocked != null) {
+      await selectLevel(firstUnlocked);
+    }
+  }
 
   bool isLevelUnlocked(String levelId) => unlockedLevelIds.contains(levelId);
 
   bool isLevelCompleted(String levelId) => completedLevelIds.contains(levelId);
 
   Future<void> selectLevel(GameLevel level) async {
+    _log.fine('Selecting level: ${level.id}');
+
     if (!isLevelUnlocked(level.id)) {
       return;
     }
@@ -150,7 +190,8 @@ class PuzzleGameController extends GetxController {
   }) async {
     suggestedNextLevelId.value = null;
     selectedLevel.value = level;
-    difficulty.value = level.difficulty;
+    selectedGroupId.value = level.groupId;
+    difficulty.value = AppConfig.developmentDifficulty;
 
     await _loadImage(level.imageAssetPath);
 
@@ -192,22 +233,14 @@ class PuzzleGameController extends GetxController {
   }
 
   Future<void> setDifficulty(PuzzleDifficulty newDifficulty) async {
-    if (difficulty.value == newDifficulty) return;
-
-    GameLevel? matching;
-    for (final GameLevel level in AppConfig.levels) {
-      if (level.difficulty == newDifficulty && isLevelUnlocked(level.id)) {
-        matching = level;
-        break;
-      }
+    if (newDifficulty != AppConfig.developmentDifficulty) {
+      return;
     }
-
-    if (matching != null) {
-      await selectLevel(matching);
+    if (difficulty.value == AppConfig.developmentDifficulty) {
       return;
     }
 
-    difficulty.value = newDifficulty;
+    difficulty.value = AppConfig.developmentDifficulty;
     final List<int> newTiles = _logic.createShuffledTiles(
       rows: rowCount,
       columns: columnCount,
@@ -364,7 +397,7 @@ class PuzzleGameController extends GetxController {
       changed = true;
     }
 
-    final GameLevel? next = _nextLevel(level);
+    final GameLevel? next = _nextLevelInGroup(level);
     if (next != null && !unlockedLevelIds.contains(next.id)) {
       unlockedLevelIds.add(next.id);
       _sortLevelIdsByOrder(unlockedLevelIds);
@@ -401,7 +434,8 @@ class PuzzleGameController extends GetxController {
     }
 
     selectedLevel.value = level;
-    difficulty.value = level.difficulty;
+    selectedGroupId.value = level.groupId;
+    difficulty.value = AppConfig.developmentDifficulty;
     suggestedNextLevelId.value = null;
     await _progressStorage.saveSelectedLevel(level.id);
   }
@@ -426,10 +460,11 @@ class PuzzleGameController extends GetxController {
   Future<void> resetLevelProgress() async {
     final GameLevel defaultLevel =
         _levelById(AppConfig.defaultLevelId) ?? AppConfig.levels.first;
+    final List<String> defaultUnlocked = _defaultUnlockedLevelIds();
 
     suggestedNextLevelId.value = null;
     completedLevelIds.clear();
-    unlockedLevelIds.assignAll(<String>[defaultLevel.id]);
+    unlockedLevelIds.assignAll(defaultUnlocked);
 
     await _applyLevel(defaultLevel, persistSelection: false, reshuffle: true);
     await _progressStorage.saveSelectedLevel(defaultLevel.id);
@@ -437,9 +472,10 @@ class PuzzleGameController extends GetxController {
     await _progressStorage.saveCompletedLevelIds(completedLevelIds.toList());
   }
 
-  GameLevel? _nextLevel(GameLevel level) {
-    for (final GameLevel candidate in AppConfig.levels) {
-      if (candidate.order == level.order + 1) {
+  GameLevel? _nextLevelInGroup(GameLevel level) {
+    final List<GameLevel> sameGroupLevels = levelsForGroup(level.groupId);
+    for (final GameLevel candidate in sameGroupLevels) {
+      if (candidate.orderInGroup == level.orderInGroup + 1) {
         return candidate;
       }
     }
@@ -462,6 +498,17 @@ class PuzzleGameController extends GetxController {
       }
     }
     return null;
+  }
+
+  List<String> _defaultUnlockedLevelIds() {
+    final List<String> ids = <String>[];
+    for (final LevelGroup group in AppConfig.levelGroups) {
+      if (group.levels.isEmpty) {
+        continue;
+      }
+      ids.add(group.levels.first.id);
+    }
+    return ids;
   }
 
   void _recomputeClusters() {

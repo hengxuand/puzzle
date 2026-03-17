@@ -23,5 +23,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/guanyu.png
-    - assets/guanyu2.png
+    - assets/levels/guanyu/
+    - assets/levels/caocao/
+    - assets/levels/lvbu/
+    - assets/levels/zhangfei/
