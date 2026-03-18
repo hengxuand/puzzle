@@ -1,4 +1,5 @@
-import 'package:discovery_puzzle/config/app_config.dart';
+import 'dart:async';
+
 import 'package:discovery_puzzle/game/puzzle_flame_game.dart';
 import 'package:discovery_puzzle/models/game_level.dart';
 import 'package:discovery_puzzle/page/welcome.dart';
@@ -8,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GamePage extends StatefulWidget {
-  const GamePage({super.key});
+  const GamePage({super.key, required this.selectedLevel});
+
+  final GameLevel selectedLevel;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -22,6 +25,7 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     _gameController = Get.find<PuzzleGameController>();
+    unawaited(_gameController.openLevel(widget.selectedLevel));
     _flameGame = PuzzleFlameGame(controller: _gameController);
   }
 
@@ -37,20 +41,17 @@ class _GamePageState extends State<GamePage> {
             padding: const EdgeInsets.all(16),
             color: Colors.blueGrey[600],
             child: Obx(() {
-              final GameLevel? selectedLevel =
-                  gameController.selectedLevel.value;
+              final GameLevel selectedLevel = widget.selectedLevel;
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    selectedLevel == null
-                        ? 'Puzzle Challenge'
-                        : '${selectedLevel.name} (${selectedLevel.difficulty.displaySize})',
+                    '${selectedLevel.name} (${selectedLevel.difficulty.displaySize})',
                     style: theme.textTheme.headlineSmall,
                   ),
                   Text(
-                    selectedLevel?.description ?? 'Prepare your puzzle board',
+                    selectedLevel.description,
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),

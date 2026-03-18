@@ -140,9 +140,10 @@ class _WelcomePageState extends State<WelcomePage> {
               ElevatedButton(
                 onPressed: selectedLevel == null
                     ? null
-                    : () async {
-                        await _puzzleController.selectLevel(selectedLevel);
-                        Get.offAll(() => const GamePage());
+                    : () {
+                        Get.offAll(
+                          () => GamePage(selectedLevel: selectedLevel),
+                        );
                       },
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),

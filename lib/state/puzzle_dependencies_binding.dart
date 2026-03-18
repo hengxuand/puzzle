@@ -9,14 +9,11 @@ import 'package:get/get.dart';
 class PuzzleDependenciesBinding extends Bindings {
   @override
   void dependencies() {
+    Get.put(ProgressStorageService(), permanent: true);
     Get.put(PuzzleLogic(), permanent: true);
     Get.put(GameLevelController(), permanent: true);
     Get.put(LevelStatusController(), permanent: true);
     Get.put(const PuzzleImageLoader(), permanent: true);
     Get.put(PuzzleGameController(), permanent: true);
-    Get.putAsync<ProgressStorageService>(
-      () async => await ProgressStorageService().init(),
-      permanent: true,
-    );
   }
 }

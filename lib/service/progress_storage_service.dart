@@ -10,9 +10,10 @@ class ProgressStorageService extends GetxService {
 
   static const String _progressSnapshotKey = 'level_progress_snapshot_v1';
 
-  Future<ProgressStorageService> init() async {
+  @override
+  void onInit() async {
+    super.onInit();
     _prefs = await SharedPreferences.getInstance();
-    return this;
   }
 
   Future<void> saveProgressSnapshot(LevelProgressSnapshot snapshot) async {

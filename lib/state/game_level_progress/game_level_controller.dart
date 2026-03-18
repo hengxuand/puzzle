@@ -24,6 +24,11 @@ class GameLevelController extends GetxController {
     loadProgress();
   }
 
+  Future<void> resetProgress() async {
+    _storageService.clearProgressSnapshot();
+    await loadProgress();
+  }
+
   List<GameLevel> levelsForGroup(String groupId) {
     final LevelProgressSnapshot? snapshot = progressSnapshot.value;
     if (snapshot == null) {
