@@ -1,6 +1,17 @@
 class AppConfig {
   const AppConfig._();
 
+  static const GameLevel defaultLevel = GameLevel(
+    id: 'guanyu_1',
+    groupId: 'guanyu',
+    name: 'Green Dragon I',
+    description: 'Easy mode training board.',
+    difficulty: PuzzleDifficulty.easiest,
+    imageAssetPath: 'assets/levels/guanyu/guanyu_1.png',
+    thumbnailAssetPath: 'assets/levels/guanyu/guanyu_1.png',
+    orderInGroup: 1,
+  );
+
   static const List<LevelGroup> levelGroups = <LevelGroup>[
     LevelGroup(
       id: 'guanyu',
@@ -8,16 +19,7 @@ class AppConfig {
       description: 'Steady tactical boards.',
       order: 1,
       levels: <GameLevel>[
-        GameLevel(
-          id: 'guanyu_1',
-          groupId: 'guanyu',
-          name: 'Green Dragon I',
-          description: 'Easy mode training board.',
-          difficulty: PuzzleDifficulty.easiest,
-          imageAssetPath: 'assets/levels/guanyu/guanyu_1.png',
-          thumbnailAssetPath: 'assets/levels/guanyu/guanyu_1.png',
-          orderInGroup: 1,
-        ),
+        defaultLevel,
         GameLevel(
           id: 'guanyu_2',
           groupId: 'guanyu',
@@ -165,8 +167,6 @@ class AppConfig {
       for (final GameLevel level in group.levels)
         level.id: group.order * 100 + level.orderInGroup,
   };
-
-  static const String defaultLevelId = 'guanyu_1';
 }
 
 class LevelGroup {

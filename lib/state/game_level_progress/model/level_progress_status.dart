@@ -1,4 +1,4 @@
-enum LevelProgressStatus { locked, unlocked, inProgress, completed }
+enum LevelProgressStatus { locked, unlocked, completed }
 
 extension LevelProgressStatusWire on LevelProgressStatus {
   String get wireValue {
@@ -7,8 +7,6 @@ extension LevelProgressStatusWire on LevelProgressStatus {
         return 'locked';
       case LevelProgressStatus.unlocked:
         return 'unlocked';
-      case LevelProgressStatus.inProgress:
-        return 'in_progress';
       case LevelProgressStatus.completed:
         return 'completed';
     }
@@ -18,8 +16,6 @@ extension LevelProgressStatusWire on LevelProgressStatus {
     switch (value) {
       case 'unlocked':
         return LevelProgressStatus.unlocked;
-      case 'in_progress':
-        return LevelProgressStatus.inProgress;
       case 'completed':
         return LevelProgressStatus.completed;
       case 'locked':
