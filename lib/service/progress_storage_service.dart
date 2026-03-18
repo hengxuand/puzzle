@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:discovery_puzzle/state/game_level_progress/model/level_progress_snapshot.dart';
+import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,14 +15,12 @@ class ProgressStorageService extends GetxService {
     return this;
   }
 
-  // ✅ SAVE LIST
   Future<void> saveProgressSnapshot(LevelProgressSnapshot snapshot) async {
     final jsonString = jsonEncode(snapshot.toJson());
 
     await _prefs.setString(_progressSnapshotKey, jsonString);
   }
 
-  // ✅ LOAD LIST
   LevelProgressSnapshot? loadProgressSnapshot() {
     final jsonString = _prefs.getString(_progressSnapshotKey);
 
@@ -35,8 +33,7 @@ class ProgressStorageService extends GetxService {
     return LevelProgressSnapshot.fromJson(decoded);
   }
 
-  // ✅ CLEAR
-  Future<void> clearGroups() async {
+  Future<void> clearProgressSnapshot() async {
     await _prefs.remove(_progressSnapshotKey);
   }
 }

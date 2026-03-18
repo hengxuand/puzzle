@@ -1,21 +1,64 @@
-import 'package:discovery_puzzle/config/app_config.dart';
+import 'package:discovery_puzzle/models/game_level.dart';
+import 'package:discovery_puzzle/models/level_group.dart';
 import 'package:discovery_puzzle/page/game.dart';
 import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+import 'package:discovery_puzzle/state/game_level_progress/game_level_controller.dart';
+import 'package:discovery_puzzle/state/game_level_progress/level_status_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PuzzleGameController controller = Get.find<PuzzleGameController>();
+  State<WelcomePage> createState() => _WelcomePageState();
+}
 
+class _WelcomePageState extends State<WelcomePage> {
+  final PuzzleGameController _puzzleController =
+      Get.find<PuzzleGameController>();
+  final GameLevelController _gameLevelController =
+      Get.find<GameLevelController>();
+  final LevelStatusController _levelStatusController =
+      Get.find<LevelStatusController>();
+
+  String? _selectedGroupId;
+  String? _selectedLevelId;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FA),
       body: Center(
-        child: Obx(
-          () => Column(
+        child: Obx(() {
+          final List<LevelGroup> groups =
+              (_gameLevelController.progressSnapshot.value?.groups.values
+                        .toList(growable: false) ??
+                    <LevelGroup>[])
+                ..sort((a, b) => a.order.compareTo(b.order));
+
+          if (groups.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          final String selectedGroupId =
+              groups.any((group) => group.id == _selectedGroupId)
+              ? _selectedGroupId!
+              : groups.first.id;
+
+          final LevelGroup selectedGroup = groups.firstWhere(
+            (group) => group.id == selectedGroupId,
+          );
+
+          final List<GameLevel> levels = selectedGroup.levels.values.toList()
+            ..sort((a, b) => a.orderInGroup.compareTo(b.orderInGroup));
+
+          final GameLevel? selectedLevel = levels
+              .where((level) => level.id == _selectedLevelId)
+              .cast<GameLevel?>()
+              .firstOrNull;
+
+          return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const SizedBox(height: 32),
@@ -32,14 +75,73 @@ class WelcomePage extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: _GroupedLevelSelector(controller: controller),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 70,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            final LevelGroup group = groups[index];
+                            final bool isSelected = selectedGroupId == group.id;
+
+                            return ChoiceChip(
+                              selected: isSelected,
+                              label: Text(group.name),
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedGroupId = group.id;
+                                  _selectedLevelId = null;
+                                });
+                              },
+                            );
+                          },
+                          separatorBuilder: (_, index) =>
+                              const SizedBox(width: 8),
+                          itemCount: groups.length,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          selectedGroup.description,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            for (final GameLevel level in levels)
+                              _LevelCard(
+                                level: level,
+                                isSelected: _selectedLevelId == level.id,
+                                isLocked: _levelStatusController.isLocked(
+                                  level.id,
+                                ),
+                                isCompleted: _levelStatusController.isCompleted(
+                                  level.id,
+                                ),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedLevelId = level.id;
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: controller.selectedLevel.value == null
+                onPressed: selectedLevel == null
                     ? null
-                    : () {
+                    : () async {
+                        await _puzzleController.selectLevel(selectedLevel);
                         Get.offAll(() => const GamePage());
                       },
                 child: const Padding(
@@ -70,7 +172,11 @@ class WelcomePage extends StatelessWidget {
                   );
 
                   if (confirmed == true) {
-                    await controller.resetLevelProgress();
+                    await _puzzleController.resetLevelProgress();
+                    setState(() {
+                      _selectedGroupId = null;
+                      _selectedLevelId = null;
+                    });
                   }
                 },
                 icon: const Icon(Icons.restart_alt),
@@ -78,85 +184,31 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
             ],
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _GroupedLevelSelector extends StatelessWidget {
-  const _GroupedLevelSelector({required this.controller});
-
-  final PuzzleGameController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<LevelGroup> groups = controller.groups;
-    if (groups.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final String selectedGroupId =
-        controller.selectedGroupId.value ?? groups.first.id;
-    final List<GameLevel> levels = controller.levelsForGroup(selectedGroupId);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          height: 70,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              final LevelGroup group = groups[index];
-              final bool isSelected = selectedGroupId == group.id;
-              return ChoiceChip(
-                selected: isSelected,
-                label: Text(group.name),
-                onSelected: (_) {
-                  controller.setSelectedGroup(group.id);
-                },
-              );
-            },
-            separatorBuilder: (_, index) => const SizedBox(width: 8),
-            itemCount: groups.length,
-          ),
-        ),
-        const SizedBox(height: 8),
-        for (final LevelGroup group in groups)
-          if (group.id == selectedGroupId)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                group.description,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ),
-        Expanded(
-          child: ListView(
-            children: [
-              for (final GameLevel level in levels)
-                _LevelCard(level: level, controller: controller),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _LevelCard extends StatelessWidget {
-  const _LevelCard({required this.level, required this.controller});
+  const _LevelCard({
+    required this.level,
+    required this.isSelected,
+    required this.isLocked,
+    required this.isCompleted,
+    required this.onTap,
+  });
 
   final GameLevel level;
-  final PuzzleGameController controller;
+  final bool isSelected;
+  final bool isLocked;
+  final bool isCompleted;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final bool isUnlocked = controller.isLevelUnlocked(level.id);
-    final bool isCompleted = controller.isLevelCompleted(level.id);
-    final bool isSelected = controller.selectedLevel.value?.id == level.id;
+    final bool isUnlocked = !isLocked;
     final BorderRadius cardBorderRadius = BorderRadius.circular(12);
 
     return Card(
@@ -166,11 +218,7 @@ class _LevelCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: cardBorderRadius),
       child: InkWell(
         borderRadius: cardBorderRadius,
-        onTap: isUnlocked
-            ? () {
-                controller.selectLevel(level);
-              }
-            : null,
+        onTap: isLocked ? null : onTap,
         child: Padding(
           padding: const EdgeInsets.all(14),
           child: Row(

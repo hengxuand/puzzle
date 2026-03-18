@@ -2,10 +2,13 @@ import 'dart:ui' as ui;
 
 import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/logic/puzzle_logic.dart';
+import 'package:discovery_puzzle/models/game_level.dart';
+import 'package:discovery_puzzle/models/level_group.dart';
+import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
+import 'package:discovery_puzzle/models/level_progress_status.dart';
+import 'package:discovery_puzzle/models/puzzle_difficulty.dart';
 import 'package:discovery_puzzle/service/puzzle_image_loader.dart';
-import 'package:discovery_puzzle/state/game_level_progress/level_progress_controller.dart';
-import 'package:discovery_puzzle/state/game_level_progress/model/level_progress_snapshot.dart';
-import 'package:discovery_puzzle/state/game_level_progress/model/level_progress_status.dart';
+import 'package:discovery_puzzle/state/game_level_progress/game_level_controller.dart';
 import 'package:get/get.dart';
 import 'package:logging/logging.dart';
 
@@ -14,16 +17,13 @@ class PuzzleGameController extends GetxController {
 
   late final PuzzleLogic _logic = Get.find<PuzzleLogic>();
   late final PuzzleImageLoader _imageLoader = Get.find<PuzzleImageLoader>();
-  late final LevelProgressController _progressStorage =
-      Get.find<LevelProgressController>();
+  late final GameLevelController _progressStorage =
+      Get.find<GameLevelController>();
 
   final RxBool isInitialized = false.obs;
   final Rxn<GameLevel> selectedLevel = Rxn<GameLevel>();
   final RxnString selectedGroupId = RxnString();
-  final RxMap<String, LevelProgressStatus> levelStatusById =
-      <String, LevelProgressStatus>{}.obs;
   final RxList<String> unlockedLevelIds = <String>[].obs;
-  final RxList<String> inProgressLevelIds = <String>[].obs;
   final RxList<String> completedLevelIds = <String>[].obs;
 
   final RxList<int> tiles = <int>[].obs;
@@ -34,7 +34,6 @@ class PuzzleGameController extends GetxController {
   final RxnInt activeDragClusterId = RxnInt();
   final RxMap<int, int> boardIndexToClusterId = <int, int>{}.obs;
   final RxMap<int, List<int>> clusterIdToBoardIndices = <int, List<int>>{}.obs;
-  late final Worker _progressMetricsWorker;
 
   int get rowCount =>
       selectedLevel.value?.difficulty.rows ?? PuzzleDifficulty.easiest.rows;
@@ -46,161 +45,36 @@ class PuzzleGameController extends GetxController {
   void onInit() {
     super.onInit();
     _log.fine('onInit called');
-    _progressMetricsWorker = ever<Map<String, LevelProgressStatus>>(
-      levelStatusById,
-      (_) {
-        _syncDerivedProgressMetrics();
-      },
-    );
     isInitialized.value = false;
     _initializeLevelState();
   }
 
-  @override
-  void onClose() {
-    _progressMetricsWorker.dispose();
-    super.onClose();
-  }
-
   Future<void> _initializeLevelState() async {
-    final LevelProgressSnapshot snapshot = await _progressStorage.load();
-    final String? persistedSelectedLevelId = await _progressStorage
-        .loadSelectedLevelId();
-    levelStatusById.assignAll(snapshot.levelStatusById);
-    _syncDerivedProgressMetrics();
+    // final LevelProgressSnapshot snapshot =
+    //     _progressStorage.progressSnapshot.value ??
+    //     await _progressStorage.loadProgress();
 
-    GameLevel? initialLevel = persistedSelectedLevelId == null
-        ? AppConfig.defaultLevel
-        : _levelById(persistedSelectedLevelId);
+    // GameLevel? initialLevel = persistedSelectedLevelId == null
+    //     ? AppConfig.defaultLevel
+    //     : _levelById(persistedSelectedLevelId);
 
-    if (initialLevel == null || !isLevelUnlocked(initialLevel.id)) {
-      initialLevel = _firstUnlockedLevel();
-    }
+    // if (initialLevel == null || !isLevelUnlocked(initialLevel.id)) {
+    //   initialLevel = _firstUnlockedLevel();
+    // }
 
-    if (initialLevel == null) {
-      initialLevel = AppConfig.levels.first;
-      _setLevelStatus(initialLevel.id, LevelProgressStatus.unlocked);
-    }
+    // if (initialLevel == null) {
+    //   initialLevel = AppConfig.levels.first;
+    //   _setLevelStatus(initialLevel.id, LevelProgressStatus.unlocked);
+    // }
 
-    await _applyLevel(initialLevel, persistSelection: false, reshuffle: true);
+    // await _applyLevel(initialLevel, persistSelection: false, reshuffle: true);
 
-    if (persistedSelectedLevelId != initialLevel.id) {
-      await _persistSelectedLevelId(initialLevel.id);
-    }
-    await _persistProgressSnapshot();
+    // if (persistedSelectedLevelId != initialLevel.id) {
+    //   await _persistSelectedLevelId(initialLevel.id);
+    // }
+    // await _persistProgressSnapshot();
     isInitialized.value = true;
   }
-
-  // void _syncDerivedProgressMetrics() {
-  //   final List<String> unlocked = <String>[];
-  //   final List<String> inProgress = <String>[];
-  //   final List<String> completed = <String>[];
-
-  //   for (final GameLevel level in AppConfig.levels) {
-  //     final LevelProgressStatus status =
-  //         levelStatusById[level.id] ?? LevelProgressStatus.locked;
-  //     if (status == LevelProgressStatus.unlocked ||
-  //         status == LevelProgressStatus.inProgress ||
-  //         status == LevelProgressStatus.completed) {
-  //       unlocked.add(level.id);
-  //     }
-  //     if (status == LevelProgressStatus.inProgress) {
-  //       inProgress.add(level.id);
-  //     }
-  //     if (status == LevelProgressStatus.completed) {
-  //       completed.add(level.id);
-  //     }
-  //   }
-
-  //   unlockedLevelIds.assignAll(unlocked);
-  //   inProgressLevelIds.assignAll(inProgress);
-  //   completedLevelIds.assignAll(completed);
-  // }
-
-  bool _setLevelStatus(String levelId, LevelProgressStatus status) {
-    final LevelProgressStatus current =
-        levelStatusById[levelId] ?? LevelProgressStatus.locked;
-    if (current == status) {
-      return false;
-    }
-    levelStatusById[levelId] = status;
-    return true;
-  }
-
-  // bool _setSelectedLevelInProgress(String selectedLevelId) {
-  //   bool changed = false;
-
-  //   for (final String id in levelStatusById.keys.toList(growable: false)) {
-  //     final LevelProgressStatus status = levelStatusById[id]!;
-  //     if (status == LevelProgressStatus.inProgress && id != selectedLevelId) {
-  //       levelStatusById[id] = LevelProgressStatus.unlocked;
-  //       changed = true;
-  //     }
-  //   }
-
-  //   final LevelProgressStatus selectedStatus =
-  //       levelStatusById[selectedLevelId] ?? LevelProgressStatus.locked;
-  //   if (selectedStatus == LevelProgressStatus.unlocked) {
-  //     levelStatusById[selectedLevelId] = LevelProgressStatus.inProgress;
-  //     changed = true;
-  //   }
-
-  //   return changed;
-  // }
-
-  // Future<void> _persistProgressSnapshot() async {
-  //   await _progressStorage.saveSnapshot(
-  //     LevelProgressSnapshot.fromLevelStatuses(
-  //       statusByLevelId: Map<String, LevelProgressStatus>.from(levelStatusById),
-  //     ),
-  //   );
-  // }
-
-  // Future<void> _persistSelectedLevelId(String levelId) async {
-  //   await _progressStorage.saveSelectedLevelId(levelId);
-  // }
-
-  List<GameLevel> get levels => AppConfig.levels;
-  List<LevelGroup> get groups => AppConfig.levelGroups;
-
-  List<GameLevel> levelsForGroup(String groupId) {
-    return AppConfig.levels.where((level) => level.groupId == groupId).toList()
-      ..sort((a, b) => a.orderInGroup.compareTo(b.orderInGroup));
-  }
-
-  Future<void> setSelectedGroup(String groupId) async {
-    if (selectedGroupId.value == groupId) {
-      return;
-    }
-
-    selectedGroupId.value = groupId;
-
-    final List<GameLevel> groupLevels = levelsForGroup(groupId);
-    if (groupLevels.isEmpty) {
-      return;
-    }
-
-    final GameLevel? selected = selectedLevel.value;
-    if (selected != null && selected.groupId == groupId) {
-      return;
-    }
-
-    GameLevel? firstUnlocked;
-    for (final GameLevel level in groupLevels) {
-      if (isLevelUnlocked(level.id)) {
-        firstUnlocked = level;
-        break;
-      }
-    }
-
-    if (firstUnlocked != null) {
-      await selectLevel(firstUnlocked);
-    }
-  }
-
-  bool isLevelUnlocked(String levelId) => unlockedLevelIds.contains(levelId);
-
-  bool isLevelCompleted(String levelId) => completedLevelIds.contains(levelId);
 
   Future<void> selectLevel(GameLevel level) async {
     _log.fine('Selecting level: ${level.id}');
@@ -419,7 +293,7 @@ class PuzzleGameController extends GetxController {
     final Map<String, LevelProgressStatus> resetStatuses =
         <String, LevelProgressStatus>{};
     for (final LevelGroup group in AppConfig.levelGroups) {
-      for (final GameLevel level in group.levels) {
+      for (final GameLevel level in group.levels.values) {
         resetStatuses[level.id] = level.orderInGroup == 1
             ? LevelProgressStatus.unlocked
             : LevelProgressStatus.locked;

@@ -1,5 +1,6 @@
 import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/game/puzzle_flame_game.dart';
+import 'package:discovery_puzzle/models/game_level.dart';
 import 'package:discovery_puzzle/page/welcome.dart';
 import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
 import 'package:flame/game.dart';
