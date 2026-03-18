@@ -2,9 +2,11 @@ import 'dart:ui' as ui;
 
 import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/logic/puzzle_logic.dart';
-import 'package:discovery_puzzle/service/level_progress_storage.dart';
 import 'package:discovery_puzzle/service/puzzle_image_loader.dart';
 import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+import 'package:discovery_puzzle/state/game_level_progress/level_progress_controller.dart';
+import 'package:discovery_puzzle/state/game_level_progress/level_progress_snapshot.dart';
+import 'package:discovery_puzzle/state/game_level_progress/level_progress_status.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
@@ -21,8 +23,8 @@ class _FakePuzzleImageLoader extends PuzzleImageLoader {
   }
 }
 
-class _FakeLevelProgressStorage extends LevelProgressStorage {
-  const _FakeLevelProgressStorage();
+class _FakeLevelProgressController extends LevelProgressController {
+  _FakeLevelProgressController();
 
   static String? selectedLevelId;
   static List<String> unlockedLevelIds = <String>[];
@@ -36,26 +38,37 @@ class _FakeLevelProgressStorage extends LevelProgressStorage {
 
   @override
   Future<LevelProgressSnapshot> load() async {
-    return LevelProgressSnapshot(
+    final Map<String, LevelProgressStatus> statuses =
+        <String, LevelProgressStatus>{};
+    for (final String id in unlockedLevelIds) {
+      statuses[id] = LevelProgressStatus.unlocked;
+    }
+    for (final String id in completedLevelIds) {
+      statuses[id] = LevelProgressStatus.completed;
+    }
+
+    return LevelProgressSnapshot.fromLevelStatuses(
       selectedLevelId: selectedLevelId,
-      unlockedLevelIds: List<String>.from(unlockedLevelIds),
-      completedLevelIds: List<String>.from(completedLevelIds),
+      statusByLevelId: statuses,
     );
   }
 
   @override
+  Future<void> saveSnapshot(LevelProgressSnapshot snapshot) async {
+    selectedLevelId = snapshot.selectedLevelId;
+    unlockedLevelIds = List<String>.from(snapshot.unlockedLevelIds);
+    completedLevelIds = List<String>.from(snapshot.completedLevelIds);
+  }
+
+  @override
   Future<void> saveSelectedLevel(String levelId) async {
-    selectedLevelId = levelId;
-  }
-
-  @override
-  Future<void> saveUnlockedLevelIds(List<String> ids) async {
-    unlockedLevelIds = List<String>.from(ids);
-  }
-
-  @override
-  Future<void> saveCompletedLevelIds(List<String> ids) async {
-    completedLevelIds = List<String>.from(ids);
+    final LevelProgressSnapshot current = await load();
+    await saveSnapshot(
+      LevelProgressSnapshot.fromLevelStatuses(
+        selectedLevelId: levelId,
+        statusByLevelId: current.levelStatusById,
+      ),
+    );
   }
 }
 
@@ -67,11 +80,11 @@ void main() {
   setUp(() async {
     Get.testMode = true;
     Get.reset();
-    _FakeLevelProgressStorage.resetStore();
+    _FakeLevelProgressController.resetStore();
 
     Get.put(PuzzleLogic(), permanent: true);
-    Get.put<LevelProgressStorage>(
-      const _FakeLevelProgressStorage(),
+    Get.put<LevelProgressController>(
+      _FakeLevelProgressController(),
       permanent: true,
     );
     Get.put<PuzzleImageLoader>(const _FakePuzzleImageLoader(), permanent: true);
@@ -93,7 +106,6 @@ void main() {
   });
 
   test('canAcceptClusterDrop rejects out-of-bounds translation', () {
-    controller.difficulty.value = controller.difficulty.value;
     controller.tiles.assignAll(List<int>.generate(24, (i) => i));
     controller.clusterIdToBoardIndices.assignAll(<int, List<int>>{
       7: <int>[0, 1],
@@ -240,42 +252,7 @@ void main() {
 
     expect(controller.isSolved.value, isTrue);
     expect(controller.isLevelCompleted(AppConfig.defaultLevelId), isTrue);
-    expect(controller.isLevelUnlocked('level_2'), isTrue);
-    expect(controller.suggestedNextLevelId.value, 'level_2');
-  });
-
-  test(
-    'applySuggestedLevelSelectionForMenu selects unlocked next level',
-    () async {
-      final List<int> almostSolved = List<int>.generate(24, (i) => i);
-      almostSolved[0] = 1;
-      almostSolved[1] = 0;
-      controller.tiles.assignAll(almostSolved);
-      controller.swapTiles(0, 1);
-
-      await Future<void>.delayed(const Duration(milliseconds: 1));
-      await controller.applySuggestedLevelSelectionForMenu();
-
-      expect(controller.selectedLevel.value?.id, 'level_2');
-      expect(controller.suggestedNextLevelId.value, isNull);
-    },
-  );
-
-  test('playSuggestedNextLevel starts the next level immediately', () async {
-    final List<int> almostSolved = List<int>.generate(24, (i) => i);
-    almostSolved[0] = 1;
-    almostSolved[1] = 0;
-    controller.tiles.assignAll(almostSolved);
-    controller.swapTiles(0, 1);
-
-    await Future<void>.delayed(const Duration(milliseconds: 1));
-
-    expect(controller.suggestedNextLevelId.value, 'level_2');
-    await controller.playSuggestedNextLevel();
-
-    expect(controller.selectedLevel.value?.id, 'level_2');
-    expect(controller.suggestedNextLevelId.value, isNull);
-    expect(controller.isSolved.value, isFalse);
+    expect(controller.isLevelUnlocked('guanyu_2'), isTrue);
   });
 
   test('resetLevelProgress restores default unlock state', () async {
@@ -293,35 +270,41 @@ void main() {
     await controller.resetLevelProgress();
 
     expect(controller.selectedLevel.value?.id, AppConfig.defaultLevelId);
-    expect(controller.suggestedNextLevelId.value, isNull);
     expect(controller.completedLevelIds, isEmpty);
-    expect(controller.unlockedLevelIds, <String>[AppConfig.defaultLevelId]);
-
-    expect(_FakeLevelProgressStorage.selectedLevelId, AppConfig.defaultLevelId);
-    expect(_FakeLevelProgressStorage.unlockedLevelIds, <String>[
-      AppConfig.defaultLevelId,
+    expect(controller.unlockedLevelIds, <String>[
+      for (final LevelGroup group in AppConfig.levelGroups)
+        if (group.levels.isNotEmpty) group.levels.first.id,
     ]);
-    expect(_FakeLevelProgressStorage.completedLevelIds, isEmpty);
+
+    expect(
+      _FakeLevelProgressController.selectedLevelId,
+      AppConfig.defaultLevelId,
+    );
+    expect(_FakeLevelProgressController.unlockedLevelIds, <String>[
+      for (final LevelGroup group in AppConfig.levelGroups)
+        if (group.levels.isNotEmpty) group.levels.first.id,
+    ]);
+    expect(_FakeLevelProgressController.completedLevelIds, isEmpty);
   });
 
   test('sanitizes persisted level progress against catalog changes', () async {
     Get.reset();
-    _FakeLevelProgressStorage.resetStore();
-    _FakeLevelProgressStorage.selectedLevelId = 'removed_level';
-    _FakeLevelProgressStorage.unlockedLevelIds = <String>[
-      'level_1',
-      'level_1',
+    _FakeLevelProgressController.resetStore();
+    _FakeLevelProgressController.selectedLevelId = 'removed_level';
+    _FakeLevelProgressController.unlockedLevelIds = <String>[
+      'guanyu_1',
+      'guanyu_1',
       'removed_level',
     ];
-    _FakeLevelProgressStorage.completedLevelIds = <String>[
-      'level_2',
+    _FakeLevelProgressController.completedLevelIds = <String>[
+      'guanyu_2',
       'removed_level',
-      'level_2',
+      'guanyu_2',
     ];
 
     Get.put(PuzzleLogic(), permanent: true);
-    Get.put<LevelProgressStorage>(
-      const _FakeLevelProgressStorage(),
+    Get.put<LevelProgressController>(
+      _FakeLevelProgressController(),
       permanent: true,
     );
     Get.put<PuzzleImageLoader>(const _FakePuzzleImageLoader(), permanent: true);
@@ -342,11 +325,11 @@ void main() {
 
     expect(
       sanitizedController.unlockedLevelIds,
-      containsAll(<String>['level_1', 'level_2']),
+      containsAll(<String>['guanyu_1', 'guanyu_2']),
     );
     expect(
       sanitizedController.unlockedLevelIds
-          .where((id) => id == 'level_1')
+          .where((id) => id == 'guanyu_1')
           .length,
       1,
     );
@@ -354,6 +337,6 @@ void main() {
       sanitizedController.unlockedLevelIds.contains('removed_level'),
       isFalse,
     );
-    expect(sanitizedController.selectedLevel.value?.id, 'level_1');
+    expect(sanitizedController.selectedLevel.value?.id, 'guanyu_1');
   });
 }

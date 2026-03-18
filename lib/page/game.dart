@@ -1,7 +1,7 @@
 import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/game/puzzle_flame_game.dart';
 import 'package:discovery_puzzle/page/welcome.dart';
-import 'package:discovery_puzzle/state/puzzle_providers.dart';
+import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -77,13 +77,12 @@ class _GamePageState extends State<GamePage> {
                   const SizedBox(height: 24),
                   Row(
                     children: [
+                      const Spacer(),
                       Expanded(
                         child: SizedBox(
                           height: 52,
                           child: ElevatedButton(
                             onPressed: () async {
-                              await gameController
-                                  .applySuggestedLevelSelectionForMenu();
                               Get.offAll(() => const WelcomePage());
                             },
                             child: const Text(
@@ -93,22 +92,7 @@ class _GamePageState extends State<GamePage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 48),
-                      Expanded(
-                        child: SizedBox(
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            onPressed: gameController.isSolved.value
-                                ? () async {
-                                    await gameController
-                                        .playSuggestedNextLevel();
-                                  }
-                                : null,
-                            icon: const Icon(Icons.skip_next),
-                            label: const Text('Play Next Level'),
-                          ),
-                        ),
-                      ),
+                      const Spacer(),
                     ],
                   ),
                   const SizedBox(height: 24),

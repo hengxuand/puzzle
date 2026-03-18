@@ -1,14 +1,6 @@
 class AppConfig {
   const AppConfig._();
 
-  static const List<PuzzleDifficulty> difficultyPresets = <PuzzleDifficulty>[
-    PuzzleDifficulty.easiest,
-  ];
-  static const PuzzleDifficulty developmentDifficulty =
-      PuzzleDifficulty.easiest;
-  static const PuzzleDifficulty defaultDifficulty = PuzzleDifficulty.easiest;
-  static const String puzzleImagePath = 'assets/levels/guanyu/guanyu_1.png';
-
   static const List<LevelGroup> levelGroups = <LevelGroup>[
     LevelGroup(
       id: 'guanyu',
@@ -21,7 +13,7 @@ class AppConfig {
           groupId: 'guanyu',
           name: 'Green Dragon I',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/guanyu/guanyu_1.png',
           thumbnailAssetPath: 'assets/levels/guanyu/guanyu_1.png',
           orderInGroup: 1,
@@ -31,7 +23,7 @@ class AppConfig {
           groupId: 'guanyu',
           name: 'Green Dragon II',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/guanyu/guanyu_2.png',
           thumbnailAssetPath: 'assets/levels/guanyu/guanyu_2.png',
           orderInGroup: 2,
@@ -41,7 +33,7 @@ class AppConfig {
           groupId: 'guanyu',
           name: 'Green Dragon III',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/guanyu/guanyu_3.png',
           thumbnailAssetPath: 'assets/levels/guanyu/guanyu_3.png',
           orderInGroup: 3,
@@ -59,7 +51,7 @@ class AppConfig {
           groupId: 'caocao',
           name: 'Wei Vanguard I',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_1.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_1.png',
           orderInGroup: 1,
@@ -69,7 +61,7 @@ class AppConfig {
           groupId: 'caocao',
           name: 'Wei Vanguard II',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_2.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_2.png',
           orderInGroup: 2,
@@ -79,7 +71,7 @@ class AppConfig {
           groupId: 'caocao',
           name: 'Wei Vanguard III',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_3.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_3.png',
           orderInGroup: 3,
@@ -97,7 +89,7 @@ class AppConfig {
           groupId: 'lvbu',
           name: 'Sky Halberd I',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_1.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_1.png',
           orderInGroup: 1,
@@ -107,7 +99,7 @@ class AppConfig {
           groupId: 'lvbu',
           name: 'Sky Halberd II',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_2.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_2.png',
           orderInGroup: 2,
@@ -117,7 +109,7 @@ class AppConfig {
           groupId: 'lvbu',
           name: 'Sky Halberd III',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_3.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_3.png',
           orderInGroup: 3,
@@ -135,7 +127,7 @@ class AppConfig {
           groupId: 'zhangfei',
           name: 'Black Spear I',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_1.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_1.png',
           orderInGroup: 1,
@@ -145,7 +137,7 @@ class AppConfig {
           groupId: 'zhangfei',
           name: 'Black Spear II',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_2.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_2.png',
           orderInGroup: 2,
@@ -155,7 +147,7 @@ class AppConfig {
           groupId: 'zhangfei',
           name: 'Black Spear III',
           description: 'Easy mode training board.',
-          difficulty: developmentDifficulty,
+          difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_3.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_3.png',
           orderInGroup: 3,

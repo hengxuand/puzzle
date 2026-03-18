@@ -1,5 +1,5 @@
 import 'package:discovery_puzzle/page/welcome.dart';
-import 'package:discovery_puzzle/state/puzzle_providers.dart';
+import 'package:discovery_puzzle/state/puzzle_dependencies_binding.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 
 void main() {
   _configureLogging();
-  WidgetsFlutterBinding.ensureInitialized(); 
+  WidgetsFlutterBinding.ensureInitialized();
   Flame.device.fullScreen();
   Flame.device.setPortrait();
   runApp(const DiscoveryPuzzleApp());

@@ -1,6 +1,6 @@
 import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/page/game.dart';
-import 'package:discovery_puzzle/state/puzzle_providers.dart';
+import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

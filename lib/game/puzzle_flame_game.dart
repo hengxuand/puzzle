@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
 
 import 'package:discovery_puzzle/game/components/puzzle_world_component.dart';
-import 'package:discovery_puzzle/state/puzzle_providers.dart';
+import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+
 import 'package:flame/game.dart';
 
 class PuzzleFlameGame extends FlameGame {

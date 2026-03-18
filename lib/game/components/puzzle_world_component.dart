@@ -3,7 +3,8 @@ import 'dart:ui' as ui;
 import 'package:discovery_puzzle/game/components/board_slot_component.dart';
 import 'package:discovery_puzzle/game/components/cluster_drag_ghost_component.dart';
 import 'package:discovery_puzzle/game/components/tile_component.dart';
-import 'package:discovery_puzzle/state/puzzle_providers.dart';
+import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
