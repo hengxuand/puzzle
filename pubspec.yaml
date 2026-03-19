@@ -13,6 +13,7 @@ dependencies:
   get: ^4.7.3
   flame: ^1.21.0
   get_storage: ^2.1.1
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +28,11 @@ flutter:
     - assets/levels/caocao/
     - assets/levels/lvbu/
     - assets/levels/zhangfei/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_foreground: "assets/icon/icon.png"
+  adaptive_icon_background: "#121212"
+  remove_alpha_ios: true

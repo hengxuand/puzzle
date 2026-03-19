@@ -87,7 +87,7 @@ class _GamePageState extends State<GamePage> {
                           height: 52,
                           child: ElevatedButton(
                             onPressed: () async {
-                              Get.to(() => WelcomePage());
+                              Get.off(() => WelcomePage());
                             },
                             child: const FittedBox(
                               fit: BoxFit.scaleDown,

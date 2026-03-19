@@ -1,6 +1,5 @@
 import 'package:discovery_puzzle/page/welcome.dart';
 import 'package:discovery_puzzle/state/puzzle_dependencies_binding.dart';
-import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,8 +11,7 @@ Future<void> main() async {
   _configureLogging();
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  Flame.device.fullScreen();
-  Flame.device.setPortrait();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const DiscoveryPuzzleApp());
 }
