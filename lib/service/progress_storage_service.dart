@@ -1,29 +1,25 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ProgressStorageService extends GetxService {
-  late SharedPreferences _prefs;
+  ProgressStorageService({GetStorage? storage})
+    : _storage = storage ?? GetStorage();
+
+  final GetStorage _storage;
 
   static const String _progressSnapshotKey = 'level_progress_snapshot_v1';
-
-  @override
-  void onInit() async {
-    super.onInit();
-    _prefs = await SharedPreferences.getInstance();
-  }
 
   Future<void> saveProgressSnapshot(LevelProgressSnapshot snapshot) async {
     final jsonString = jsonEncode(snapshot.toJson());
 
-    await _prefs.setString(_progressSnapshotKey, jsonString);
+    await _storage.write(_progressSnapshotKey, jsonString);
   }
 
   LevelProgressSnapshot? loadProgressSnapshot() {
-    final jsonString = _prefs.getString(_progressSnapshotKey);
+    final String? jsonString = _storage.read<String>(_progressSnapshotKey);
 
     if (jsonString == null || jsonString.isEmpty) {
       return null;
@@ -35,6 +31,6 @@ class ProgressStorageService extends GetxService {
   }
 
   Future<void> clearProgressSnapshot() async {
-    await _prefs.remove(_progressSnapshotKey);
+    await _storage.remove(_progressSnapshotKey);
   }
 }

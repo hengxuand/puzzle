@@ -4,11 +4,13 @@ import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:logging/logging.dart';
 
-void main() {
+Future<void> main() async {
   _configureLogging();
   WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
   Flame.device.fullScreen();
   Flame.device.setPortrait();
   runApp(const DiscoveryPuzzleApp());

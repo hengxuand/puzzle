@@ -269,10 +269,13 @@ class _LevelCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              if (!isUnlocked)
-                const Icon(Icons.lock_outline, color: Colors.grey)
-              else if (isCompleted)
+
+              if (isCompleted)
                 const Icon(Icons.check_circle, color: Colors.green)
+              else if (isLocked)
+                const Icon(Icons.lock_outline, color: Colors.grey)
+              else if (isSelected)
+                const Icon(Icons.radio_button_checked)
               else
                 const Icon(Icons.radio_button_unchecked),
             ],
