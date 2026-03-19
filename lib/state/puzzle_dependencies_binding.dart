@@ -13,7 +13,7 @@ class PuzzleDependenciesBinding extends Bindings {
     Get.put(PuzzleLogic(), permanent: true);
     Get.put(GameLevelController(), permanent: true);
     Get.put(LevelStatusController(), permanent: true);
-    Get.put(const PuzzleImageLoader(), permanent: true);
+    Get.put(PuzzleImageLoader(), permanent: true);
     Get.put(PuzzleGameController(), permanent: true);
   }
 }

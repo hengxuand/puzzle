@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 
 class PuzzleImageLoader {
-  const PuzzleImageLoader();
+  PuzzleImageLoader();
 
   Future<ui.Image> loadFromAsset(String assetPath) async {
     final ByteData data = await rootBundle.load(assetPath);
