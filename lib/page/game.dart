@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:discovery_puzzle/config/app_config.dart';
 import 'package:discovery_puzzle/game/puzzle_flame_game.dart';
 import 'package:discovery_puzzle/models/game_level.dart';
 import 'package:discovery_puzzle/page/welcome.dart';
@@ -35,11 +36,12 @@ class _GamePageState extends State<GamePage> {
     final gameController = _gameController;
 
     return Scaffold(
+      backgroundColor: AppConfig.backgroundColor,
       body: SafeArea(
         child: Center(
           child: Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.blueGrey[600],
+            color: AppConfig.backgroundColor,
             child: Obx(() {
               final GameLevel selectedLevel = widget.selectedLevel;
 
@@ -64,7 +66,7 @@ class _GamePageState extends State<GamePage> {
                             GameWidget(game: _flameGame),
                             if (gameController.imageAsync.value == null)
                               const ColoredBox(
-                                color: Color(0xFFB7AAA4),
+                                color: AppConfig.backgroundColor,
                                 child: Center(
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
@@ -87,9 +89,12 @@ class _GamePageState extends State<GamePage> {
                             onPressed: () async {
                               Get.to(() => WelcomePage());
                             },
-                            child: const Text(
-                              'Go Back',
-                              style: TextStyle(fontSize: 18),
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'Go Back',
+                                style: TextStyle(fontSize: 18),
+                              ),
                             ),
                           ),
                         ),
