@@ -3,6 +3,7 @@ import 'package:discovery_puzzle/state/puzzle_dependencies_binding.dart';
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logging/logging.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
   await GetStorage.init();
   Flame.device.fullScreen();
   Flame.device.setPortrait();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const DiscoveryPuzzleApp());
 }
 
@@ -34,7 +36,13 @@ class DiscoveryPuzzleApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Discovery Puzzle',
       initialBinding: PuzzleDependenciesBinding(),
-      builder: (context, child) => SafeArea(child: child!),
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+        ),
+        child: child!,
+      ),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
