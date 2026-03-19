@@ -18,9 +18,6 @@ class PuzzleGameController extends GetxController {
 
   final RxBool isInitialized = false.obs;
   final Rxn<GameLevel> selectedLevel = Rxn<GameLevel>();
-  // final RxnString selectedGroupId = RxnString();
-  // final RxList<String> unlockedLevelIds = <String>[].obs;
-  // final RxList<String> completedLevelIds = <String>[].obs;
 
   final RxList<int> tiles = <int>[].obs;
   final RxBool isSolved = false.obs;
@@ -58,7 +55,6 @@ class PuzzleGameController extends GetxController {
 
   Future<void> _applyLevel(GameLevel level, {required bool reshuffle}) async {
     selectedLevel.value = level;
-    // selectedGroupId.value = level.groupId;
 
     await _loadImage(level.imageAssetPath);
 

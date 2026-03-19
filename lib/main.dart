@@ -39,7 +39,7 @@ class DiscoveryPuzzleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const WelcomePage(),
+      home: WelcomePage(),
     );
   }
 }

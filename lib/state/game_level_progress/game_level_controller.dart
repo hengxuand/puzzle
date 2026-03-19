@@ -13,15 +13,15 @@ class GameLevelController extends GetxController {
   final log = Logger('GameLevelController');
   final ProgressStorageService _storageService = Get.find();
 
-  Rx<LevelProgressSnapshot?> progressSnapshot = Rx<LevelProgressSnapshot?>(
-    null,
-  );
-  Rx<GameLevel?> selectedLevel = Rx<GameLevel?>(null);
+  final progressSnapshot = Rx<LevelProgressSnapshot?>(null);
+  final selectedGroupId = RxnInt();
+  final selectedLevel = Rx<GameLevel?>(null);
 
   @override
   void onInit() {
     super.onInit();
     loadProgress();
+    loadSelectedLevel();
   }
 
   Future<void> resetProgress() async {
@@ -41,6 +41,43 @@ class GameLevelController extends GetxController {
     }
 
     return group.levels.values.toList(growable: false);
+  }
+
+  Future<GameLevel> loadSelectedLevel() async {
+    GameLevel? level = _storageService.loadSelectedLevel();
+    if (level == null) {
+      log.warning('No previously selected level found in storage.');
+      level = Levels.defaultLevel;
+      unawaited(_storageService.saveSelectedLevel(level));
+      log.info('Initialized selected level in storage with default level.');
+    }
+
+    selectedLevel.value = level;
+    selectedGroupId.value = level.groupId;
+    return level;
+  }
+
+  void selectGroup(int groupId) {
+    selectedGroupId.value = groupId;
+    if (selectedLevel.value?.groupId != groupId) {
+      clearSelectedLevel();
+    }
+  }
+
+  void selectLevel(GameLevel level) {
+    selectedLevel.value = level;
+    selectedGroupId.value = level.groupId;
+    unawaited(_storageService.saveSelectedLevel(level));
+  }
+
+  void clearSelectedLevel() {
+    selectedLevel.value = null;
+    unawaited(_storageService.clearSelectedLevel());
+  }
+
+  void clearSelection() {
+    selectedGroupId.value = null;
+    clearSelectedLevel();
   }
 
   Future<LevelProgressSnapshot> loadProgress() async {

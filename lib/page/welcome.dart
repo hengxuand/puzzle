@@ -7,56 +7,48 @@ import 'package:discovery_puzzle/state/game_level_progress/level_status_controll
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class WelcomePage extends StatefulWidget {
+class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
 
   @override
-  State<WelcomePage> createState() => _WelcomePageState();
-}
-
-class _WelcomePageState extends State<WelcomePage> {
-  final PuzzleGameController _puzzleController =
-      Get.find<PuzzleGameController>();
-  final GameLevelController _gameLevelController =
-      Get.find<GameLevelController>();
-  final LevelStatusController _levelStatusController =
-      Get.find<LevelStatusController>();
-
-  int? _selectedGroupId;
-  int? _selectedLevelId;
-
-  @override
   Widget build(BuildContext context) {
+    final PuzzleGameController puzzleController =
+        Get.find<PuzzleGameController>();
+    final GameLevelController gameLevelController =
+        Get.find<GameLevelController>();
+    final LevelStatusController levelStatusController =
+        Get.find<LevelStatusController>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FA),
       body: Center(
         child: Obx(() {
+          final GameLevel? selectedLevel =
+              gameLevelController.selectedLevel.value;
+
           final List<LevelGroup> groups =
-              (_gameLevelController.progressSnapshot.value?.groups.values
-                        .toList(growable: false) ??
+              (gameLevelController.progressSnapshot.value?.groups.values.toList(
+                      growable: false,
+                    ) ??
                     <LevelGroup>[])
-                ..sort((a, b) => a.order.compareTo(b.order));
+                ..sort((a, b) => a.id.compareTo(b.id));
 
           if (groups.isEmpty) {
             return const SizedBox.shrink();
           }
 
           final int selectedGroupId =
-              groups.any((group) => group.id == _selectedGroupId)
-              ? _selectedGroupId!
-              : groups.first.id;
+              gameLevelController.selectedGroupId.value ??
+              selectedLevel?.groupId ??
+              groups.first.id;
 
           final LevelGroup selectedGroup = groups.firstWhere(
             (group) => group.id == selectedGroupId,
+            orElse: () => groups.first,
           );
 
           final List<GameLevel> levels = selectedGroup.levels.values.toList()
             ..sort((a, b) => a.id.compareTo(b.id));
-
-          final GameLevel? selectedLevel = levels
-              .where((level) => level.id == _selectedLevelId)
-              .cast<GameLevel?>()
-              .firstOrNull;
 
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -84,16 +76,14 @@ class _WelcomePageState extends State<WelcomePage> {
                           scrollDirection: Axis.horizontal,
                           itemBuilder: (context, index) {
                             final LevelGroup group = groups[index];
-                            final bool isSelected = selectedGroupId == group.id;
+                            final bool isSelected =
+                                selectedGroup.id == group.id;
 
                             return ChoiceChip(
                               selected: isSelected,
                               label: Text(group.name),
                               onSelected: (_) {
-                                setState(() {
-                                  _selectedGroupId = group.id;
-                                  _selectedLevelId = null;
-                                });
+                                gameLevelController.selectGroup(group.id);
                               },
                             );
                           },
@@ -116,17 +106,15 @@ class _WelcomePageState extends State<WelcomePage> {
                             for (final GameLevel level in levels)
                               _LevelCard(
                                 level: level,
-                                isSelected: _selectedLevelId == level.id,
-                                isLocked: _levelStatusController.isLocked(
+                                isSelected: selectedLevel?.id == level.id,
+                                isLocked: levelStatusController.isLocked(
                                   level.id,
                                 ),
-                                isCompleted: _levelStatusController.isCompleted(
+                                isCompleted: levelStatusController.isCompleted(
                                   level.id,
                                 ),
                                 onTap: () {
-                                  setState(() {
-                                    _selectedLevelId = level.id;
-                                  });
+                                  gameLevelController.selectLevel(level);
                                 },
                               ),
                           ],
@@ -141,9 +129,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 onPressed: selectedLevel == null
                     ? null
                     : () {
-                        Get.offAll(
-                          () => GamePage(selectedLevel: selectedLevel),
-                        );
+                        Get.to(() => GamePage(selectedLevel: selectedLevel));
                       },
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
@@ -173,11 +159,8 @@ class _WelcomePageState extends State<WelcomePage> {
                   );
 
                   if (confirmed == true) {
-                    await _puzzleController.resetLevelProgress();
-                    setState(() {
-                      _selectedGroupId = null;
-                      _selectedLevelId = null;
-                    });
+                    await puzzleController.resetLevelProgress();
+                    gameLevelController.clearSelection();
                   }
                 },
                 icon: const Icon(Icons.restart_alt),
