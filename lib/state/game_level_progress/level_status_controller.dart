@@ -7,36 +7,36 @@ import 'package:get/get.dart';
 class LevelStatusController extends GetxController {
   late final GameLevelController _progressController = Get.find();
 
-  final RxMap<LevelProgressStatus, Map<String, GameLevel>> _levelsByStatus =
-      <LevelProgressStatus, Map<String, GameLevel>>{
-        LevelProgressStatus.locked: <String, GameLevel>{},
-        LevelProgressStatus.unlocked: <String, GameLevel>{},
-        LevelProgressStatus.completed: <String, GameLevel>{},
+  final RxMap<LevelProgressStatus, Map<int, GameLevel>> _levelsByStatus =
+      <LevelProgressStatus, Map<int, GameLevel>>{
+        LevelProgressStatus.locked: <int, GameLevel>{},
+        LevelProgressStatus.unlocked: <int, GameLevel>{},
+        LevelProgressStatus.completed: <int, GameLevel>{},
       }.obs;
 
   late final Worker _progressWorker;
 
-  Map<String, GameLevel> levelsForStatus(LevelProgressStatus status) {
-    return _levelsByStatus[status] ?? const <String, GameLevel>{};
+  Map<int, GameLevel> levelsForStatus(LevelProgressStatus status) {
+    return _levelsByStatus[status] ?? const <int, GameLevel>{};
   }
 
   int countForStatus(LevelProgressStatus status) {
     return levelsForStatus(status).length;
   }
 
-  bool hasStatus(String levelId, LevelProgressStatus status) {
+  bool hasStatus(int levelId, LevelProgressStatus status) {
     return levelsForStatus(status).containsKey(levelId);
   }
 
-  bool isLocked(String levelId) {
+  bool isLocked(int levelId) {
     return hasStatus(levelId, LevelProgressStatus.locked);
   }
 
-  bool isUnlocked(String levelId) {
+  bool isUnlocked(int levelId) {
     return hasStatus(levelId, LevelProgressStatus.unlocked);
   }
 
-  bool isCompleted(String levelId) {
+  bool isCompleted(int levelId) {
     return hasStatus(levelId, LevelProgressStatus.completed);
   }
 
@@ -58,11 +58,11 @@ class LevelStatusController extends GetxController {
   }
 
   void _syncLevelsByStatus(LevelProgressSnapshot? snapshot) {
-    final Map<LevelProgressStatus, Map<String, GameLevel>> next =
-        <LevelProgressStatus, Map<String, GameLevel>>{
-          LevelProgressStatus.locked: <String, GameLevel>{},
-          LevelProgressStatus.unlocked: <String, GameLevel>{},
-          LevelProgressStatus.completed: <String, GameLevel>{},
+    final Map<LevelProgressStatus, Map<int, GameLevel>> next =
+        <LevelProgressStatus, Map<int, GameLevel>>{
+          LevelProgressStatus.locked: <int, GameLevel>{},
+          LevelProgressStatus.unlocked: <int, GameLevel>{},
+          LevelProgressStatus.completed: <int, GameLevel>{},
         };
 
     if (snapshot != null) {

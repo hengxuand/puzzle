@@ -3,8 +3,11 @@ import 'dart:convert';
 import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logging/logging.dart';
 
 class ProgressStorageService extends GetxService {
+  final log = Logger('ProgressStorageService');
+
   ProgressStorageService({GetStorage? storage})
     : _storage = storage ?? GetStorage();
 
@@ -16,6 +19,7 @@ class ProgressStorageService extends GetxService {
     final jsonString = jsonEncode(snapshot.toJson());
 
     await _storage.write(_progressSnapshotKey, jsonString);
+    log.info('Saved progress snapshot to storage.');
   }
 
   LevelProgressSnapshot? loadProgressSnapshot() {
@@ -32,5 +36,6 @@ class ProgressStorageService extends GetxService {
 
   Future<void> clearProgressSnapshot() async {
     await _storage.remove(_progressSnapshotKey);
+    log.info('Cleared progress snapshot from storage.');
   }
 }

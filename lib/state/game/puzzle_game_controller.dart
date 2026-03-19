@@ -218,6 +218,7 @@ class PuzzleGameController extends GetxController {
 
     if (!wasSolved && isSolved.value) {
       _log.fine('Current level solved: ${selectedLevel.value?.id ?? 'none'}');
+      _gameLevelController.markLevelCompleted(selectedLevel.value);
     }
   }
 

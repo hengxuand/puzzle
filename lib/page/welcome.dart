@@ -22,8 +22,8 @@ class _WelcomePageState extends State<WelcomePage> {
   final LevelStatusController _levelStatusController =
       Get.find<LevelStatusController>();
 
-  String? _selectedGroupId;
-  String? _selectedLevelId;
+  int? _selectedGroupId;
+  int? _selectedLevelId;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _WelcomePageState extends State<WelcomePage> {
             return const SizedBox.shrink();
           }
 
-          final String selectedGroupId =
+          final int selectedGroupId =
               groups.any((group) => group.id == _selectedGroupId)
               ? _selectedGroupId!
               : groups.first.id;
@@ -51,7 +51,7 @@ class _WelcomePageState extends State<WelcomePage> {
           );
 
           final List<GameLevel> levels = selectedGroup.levels.values.toList()
-            ..sort((a, b) => a.orderInGroup.compareTo(b.orderInGroup));
+            ..sort((a, b) => a.id.compareTo(b.id));
 
           final GameLevel? selectedLevel = levels
               .where((level) => level.id == _selectedLevelId)

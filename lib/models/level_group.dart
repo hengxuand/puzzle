@@ -9,35 +9,32 @@ class LevelGroup {
     required this.levels,
   });
 
-  final String id;
+  final int id;
   final String name;
   final String description;
   final int order;
-  final Map<String, GameLevel> levels;
+  final Map<int, GameLevel> levels;
 
   factory LevelGroup.fromJson(Map<String, dynamic> json) {
     final dynamic rawLevels = json['levels'];
 
-    final Map<String, GameLevel> parsedLevels;
+    final Map<int, GameLevel> parsedLevels;
     if (rawLevels is Map<String, dynamic>) {
-      parsedLevels = Map<String, GameLevel>.fromEntries(
+      parsedLevels = Map<int, GameLevel>.fromEntries(
         rawLevels.entries
             .where((entry) => entry.value is Map<String, dynamic>)
-            .map(
-              (entry) => MapEntry(
-                entry.key,
-                GameLevel.fromJson(<String, dynamic>{
-                  ...((entry.value as Map<String, dynamic>)),
-                  'id':
-                      (entry.value as Map<String, dynamic>)['id'] ?? entry.key,
-                }),
-              ),
-            ),
+            .map((entry) {
+              final GameLevel level = GameLevel.fromJson(<String, dynamic>{
+                ...((entry.value as Map<String, dynamic>)),
+                'id': (entry.value as Map<String, dynamic>)['id'] ?? entry.key,
+              });
+              return MapEntry(level.id, level);
+            }),
       );
     } else {
       final List<dynamic> rawLevelsList =
           (rawLevels as List<dynamic>?) ?? const <dynamic>[];
-      parsedLevels = Map<String, GameLevel>.fromEntries(
+      parsedLevels = Map<int, GameLevel>.fromEntries(
         rawLevelsList
             .whereType<Map<String, dynamic>>()
             .map(GameLevel.fromJson)
@@ -46,12 +43,27 @@ class LevelGroup {
     }
 
     return LevelGroup(
-      id: (json['id'] ?? json['groupId']) as String,
+      id: _parseGroupId(json['id'] ?? json['groupId']),
       name: json['name'] as String,
       description: json['description'] as String,
       order: json['order'] as int,
       levels: parsedLevels,
     );
+  }
+
+  static int _parseGroupId(dynamic rawGroupId) {
+    if (rawGroupId is int) {
+      return rawGroupId;
+    }
+
+    if (rawGroupId is String) {
+      final int? direct = int.tryParse(rawGroupId);
+      if (direct != null) {
+        return direct;
+      }
+    }
+
+    throw FormatException('Invalid group id: $rawGroupId');
   }
 
   Map<String, dynamic> toJson() {
@@ -60,7 +72,9 @@ class LevelGroup {
       'name': name,
       'description': description,
       'order': order,
-      'levels': levels.map((key, value) => MapEntry(key, value.toJson())),
+      'levels': levels.map(
+        (key, value) => MapEntry(key.toString(), value.toJson()),
+      ),
     };
   }
 }
