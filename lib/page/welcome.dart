@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:puzzle/config/app_config.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
@@ -5,8 +7,6 @@ import 'package:puzzle/page/game.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
 import 'package:puzzle/state/game_level_progress/game_level_controller.dart';
 import 'package:puzzle/state/game_level_progress/level_status_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -54,12 +54,12 @@ class WelcomePage extends StatelessWidget {
               children: [
                 const SizedBox(height: 32),
                 const Text(
-                  'Puzzle',
+                  'Story Puzzle',
                   style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Choose a group, then a level',
+                  'Choose a story to start your puzzle adventure!',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 20),
