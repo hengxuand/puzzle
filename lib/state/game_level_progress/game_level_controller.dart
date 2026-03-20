@@ -49,6 +49,7 @@ class GameLevelController extends GetxController {
       log.warning('No previously selected level found in storage.');
       level = Levels.defaultLevel;
       unawaited(_storageService.saveSelectedLevel(level));
+      _selectDefaultLevelForGroup(level.groupId);
       log.info('Initialized selected level in storage with default level.');
     }
 
@@ -60,8 +61,45 @@ class GameLevelController extends GetxController {
   void selectGroup(int groupId) {
     selectedGroupId.value = groupId;
     if (selectedLevel.value?.groupId != groupId) {
-      clearSelectedLevel();
+      _selectDefaultLevelForGroup(groupId);
     }
+  }
+
+  void _selectDefaultLevelForGroup(int groupId) {
+    final LevelGroup? group = progressSnapshot.value?.groups[groupId];
+    if (group == null || group.levels.isEmpty) {
+      clearSelection();
+      return;
+    }
+
+    final List<GameLevel> levels = group.levels.values.toList(growable: false)
+      ..sort((a, b) => a.id.compareTo(b.id));
+
+    GameLevel? firstUnlockedNonCompleted;
+    bool allCompleted = true;
+
+    for (final GameLevel level in levels) {
+      if (level.status == LevelProgressStatus.unlocked &&
+          firstUnlockedNonCompleted == null) {
+        firstUnlockedNonCompleted = level;
+      }
+
+      if (level.status != LevelProgressStatus.completed) {
+        allCompleted = false;
+      }
+    }
+
+    if (firstUnlockedNonCompleted != null) {
+      selectLevel(firstUnlockedNonCompleted);
+      return;
+    }
+
+    if (allCompleted) {
+      selectLevel(levels.first);
+      return;
+    }
+
+    selectLevel(levels.first);
   }
 
   void selectLevel(GameLevel level) {
@@ -70,14 +108,9 @@ class GameLevelController extends GetxController {
     unawaited(_storageService.saveSelectedLevel(level));
   }
 
-  void clearSelectedLevel() {
-    selectedLevel.value = null;
-    unawaited(_storageService.clearSelectedLevel());
-  }
-
   void clearSelection() {
-    selectedGroupId.value = null;
-    clearSelectedLevel();
+    selectedGroupId.value = progressSnapshot.value?.groups.keys.first;
+    _selectDefaultLevelForGroup(selectedGroupId.value!);
   }
 
   Future<LevelProgressSnapshot> loadProgress() async {
@@ -190,5 +223,6 @@ class GameLevelController extends GetxController {
 
     progressSnapshot.value = updatedSnapshot;
     await _storageService.saveProgressSnapshot(updatedSnapshot);
+    _selectDefaultLevelForGroup(level.groupId);
   }
 }

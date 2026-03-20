@@ -38,10 +38,7 @@ class WelcomePage extends StatelessWidget {
               return const SizedBox.shrink();
             }
 
-            final int selectedGroupId =
-                gameLevelController.selectedGroupId.value ??
-                selectedLevel?.groupId ??
-                groups.first.id;
+            final int selectedGroupId = gameLevelController.selectedGroupId.value ?? groups.first.id;
 
             final LevelGroup selectedGroup = groups.firstWhere(
               (group) => group.id == selectedGroupId,
