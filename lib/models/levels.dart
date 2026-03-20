@@ -1,6 +1,6 @@
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/level_group.dart';
-import 'package:discovery_puzzle/models/puzzle_difficulty.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/level_group.dart';
+import 'package:puzzle/models/puzzle_difficulty.dart';
 
 class Levels {
   static const defaultLevel = GameLevel(

@@ -1,11 +1,11 @@
-import 'package:discovery_puzzle/page/welcome.dart';
-import 'package:discovery_puzzle/state/puzzle_dependencies_binding.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logging/logging.dart';
+import 'package:puzzle/page/welcome.dart';
+import 'package:puzzle/state/puzzle_dependencies_binding.dart';
 
 Future<void> main() async {
   _configureLogging();
@@ -13,7 +13,7 @@ Future<void> main() async {
   await GetStorage.init();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  runApp(const DiscoveryPuzzleApp());
+  runApp(const PuzzleApp());
 }
 
 void _configureLogging() {
@@ -25,14 +25,14 @@ void _configureLogging() {
   });
 }
 
-class DiscoveryPuzzleApp extends StatelessWidget {
-  const DiscoveryPuzzleApp({super.key});
+class PuzzleApp extends StatelessWidget {
+  const PuzzleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Discovery Puzzle',
+      title: 'Puzzle',
       initialBinding: PuzzleDependenciesBinding(),
       builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: const SystemUiOverlayStyle(

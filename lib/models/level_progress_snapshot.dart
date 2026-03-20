@@ -1,4 +1,4 @@
-import 'package:discovery_puzzle/models/level_group.dart';
+import 'package:puzzle/models/level_group.dart';
 
 class LevelProgressSnapshot {
   const LevelProgressSnapshot({required this.groups});

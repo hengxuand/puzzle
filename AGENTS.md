@@ -1,4 +1,4 @@
-# AGENTS Guide - discovery_puzzle
+# AGENTS Guide - puzzle
 
 ## Scope and source notes
 - This guide is derived from code and docs in this repo, including `README.md` and runtime/test files under `lib/` and `test/`.

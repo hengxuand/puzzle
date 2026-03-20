@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
-import 'package:discovery_puzzle/game/components/puzzle_world_component.dart';
-import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+import 'package:puzzle/game/components/puzzle_world_component.dart';
+import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
 import 'package:flame/game.dart';
 

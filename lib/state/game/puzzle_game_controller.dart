@@ -1,10 +1,10 @@
 import 'dart:ui' as ui;
 
-import 'package:discovery_puzzle/logic/puzzle_logic.dart';
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/puzzle_difficulty.dart';
-import 'package:discovery_puzzle/service/puzzle_image_loader.dart';
-import 'package:discovery_puzzle/state/game_level_progress/game_level_controller.dart';
+import 'package:puzzle/logic/puzzle_logic.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/puzzle_difficulty.dart';
+import 'package:puzzle/service/puzzle_image_loader.dart';
+import 'package:puzzle/state/game_level_progress/game_level_controller.dart';
 import 'package:get/get.dart';
 import 'package:logging/logging.dart';
 

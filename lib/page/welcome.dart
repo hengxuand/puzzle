@@ -1,10 +1,10 @@
-import 'package:discovery_puzzle/config/app_config.dart';
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/level_group.dart';
-import 'package:discovery_puzzle/page/game.dart';
-import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
-import 'package:discovery_puzzle/state/game_level_progress/game_level_controller.dart';
-import 'package:discovery_puzzle/state/game_level_progress/level_status_controller.dart';
+import 'package:puzzle/config/app_config.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/level_group.dart';
+import 'package:puzzle/page/game.dart';
+import 'package:puzzle/state/game/puzzle_game_controller.dart';
+import 'package:puzzle/state/game_level_progress/game_level_controller.dart';
+import 'package:puzzle/state/game_level_progress/level_status_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,7 +38,8 @@ class WelcomePage extends StatelessWidget {
               return const SizedBox.shrink();
             }
 
-            final int selectedGroupId = gameLevelController.selectedGroupId.value ?? groups.first.id;
+            final int selectedGroupId =
+                gameLevelController.selectedGroupId.value ?? groups.first.id;
 
             final LevelGroup selectedGroup = groups.firstWhere(
               (group) => group.id == selectedGroupId,
@@ -53,7 +54,7 @@ class WelcomePage extends StatelessWidget {
               children: [
                 const SizedBox(height: 32),
                 const Text(
-                  'Discovery Puzzle',
+                  'Puzzle',
                   style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
@@ -190,14 +191,22 @@ class _LevelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isUnlocked = !isLocked;
-    final BorderRadius cardBorderRadius = BorderRadius.circular(12);
+    final isUnlocked = !isLocked;
+    final cardBorderRadius = BorderRadius.circular(12);
 
     return Card(
-      elevation: isSelected ? 12 : 0,
+      elevation: isSelected ? 8 : 0,
       margin: const EdgeInsets.only(bottom: 12),
       clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(borderRadius: cardBorderRadius),
+      shape: RoundedRectangleBorder(
+        borderRadius: cardBorderRadius,
+        side: isSelected
+            ? BorderSide(
+                color: Theme.of(context).colorScheme.primary.withAlpha(128),
+                width: 3,
+              )
+            : BorderSide.none,
+      ),
       child: InkWell(
         borderRadius: cardBorderRadius,
         onTap: isLocked ? null : onTap,

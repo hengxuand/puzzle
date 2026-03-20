@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/level_progress_snapshot.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:logging/logging.dart';

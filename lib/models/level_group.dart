@@ -1,4 +1,4 @@
-import 'package:discovery_puzzle/models/game_level.dart';
+import 'package:puzzle/models/game_level.dart';
 
 class LevelGroup {
   const LevelGroup({

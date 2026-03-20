@@ -1,7 +1,7 @@
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
-import 'package:discovery_puzzle/models/level_progress_status.dart';
-import 'package:discovery_puzzle/state/game_level_progress/game_level_controller.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/level_progress_snapshot.dart';
+import 'package:puzzle/models/level_progress_status.dart';
+import 'package:puzzle/state/game_level_progress/game_level_controller.dart';
 import 'package:get/get.dart';
 
 class LevelStatusController extends GetxController {

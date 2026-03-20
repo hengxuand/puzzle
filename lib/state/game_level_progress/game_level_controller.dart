@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/models/level_group.dart';
-import 'package:discovery_puzzle/models/level_progress_snapshot.dart';
-import 'package:discovery_puzzle/models/level_progress_status.dart';
-import 'package:discovery_puzzle/models/levels.dart';
-import 'package:discovery_puzzle/service/progress_storage_service.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/models/level_group.dart';
+import 'package:puzzle/models/level_progress_snapshot.dart';
+import 'package:puzzle/models/level_progress_status.dart';
+import 'package:puzzle/models/levels.dart';
+import 'package:puzzle/service/progress_storage_service.dart';
 import 'package:get/get.dart';
 import 'package:logging/logging.dart';
 

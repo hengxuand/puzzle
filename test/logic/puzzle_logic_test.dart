@@ -1,4 +1,4 @@
-import 'package:discovery_puzzle/logic/puzzle_logic.dart';
+import 'package:puzzle/logic/puzzle_logic.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 

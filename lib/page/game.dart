@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:discovery_puzzle/config/app_config.dart';
-import 'package:discovery_puzzle/game/puzzle_flame_game.dart';
-import 'package:discovery_puzzle/models/game_level.dart';
-import 'package:discovery_puzzle/page/welcome.dart';
-import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
+import 'package:puzzle/config/app_config.dart';
+import 'package:puzzle/game/puzzle_flame_game.dart';
+import 'package:puzzle/models/game_level.dart';
+import 'package:puzzle/page/welcome.dart';
+import 'package:puzzle/state/game/puzzle_game_controller.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

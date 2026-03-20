@@ -1,5 +1,5 @@
-import 'package:discovery_puzzle/models/level_progress_status.dart';
-import 'package:discovery_puzzle/models/puzzle_difficulty.dart';
+import 'package:puzzle/models/level_progress_status.dart';
+import 'package:puzzle/models/puzzle_difficulty.dart';
 
 class GameLevel {
   const GameLevel({

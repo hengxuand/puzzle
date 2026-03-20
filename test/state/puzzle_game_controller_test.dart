@@ -1,12 +1,12 @@
 // import 'dart:ui' as ui;
 
-// import 'package:discovery_puzzle/config/app_config.dart';
-// import 'package:discovery_puzzle/logic/puzzle_logic.dart';
-// import 'package:discovery_puzzle/service/puzzle_image_loader.dart';
-// import 'package:discovery_puzzle/state/game/puzzle_game_controller.dart';
-// import 'package:discovery_puzzle/state/game_level_progress/level_progress_controller.dart';
-// import 'package:discovery_puzzle/state/game_level_progress/level_progress_snapshot.dart';
-// import 'package:discovery_puzzle/state/game_level_progress/level_progress_status.dart';
+// import 'package:puzzle/config/app_config.dart';
+// import 'package:puzzle/logic/puzzle_logic.dart';
+// import 'package:puzzle/service/puzzle_image_loader.dart';
+// import 'package:puzzle/state/game/puzzle_game_controller.dart';
+// import 'package:puzzle/state/game_level_progress/level_progress_controller.dart';
+// import 'package:puzzle/state/game_level_progress/level_progress_snapshot.dart';
+// import 'package:puzzle/state/game_level_progress/level_progress_status.dart';
 // import 'package:flutter_test/flutter_test.dart';
 // import 'package:get/get.dart';
 
