@@ -1,5 +1,6 @@
 part of 'puzzle_game_controller.dart';
 
+/// Handles board mutations, cluster bookkeeping, and drag/drop movement rules.
 extension PuzzleGameControllerBoard on PuzzleGameController {
   void swapTiles(int fromIndex, int toIndex) {
     if (fromIndex == toIndex) return;
@@ -135,7 +136,7 @@ extension PuzzleGameControllerBoard on PuzzleGameController {
 
   void _setBoardState(List<int> newTiles) {
     PuzzleGameController._log.fine(
-      'Selected level status before setboardstate = ${selectedLevel.value?.status}',
+      'Selected level status before setBoardState = ${selectedLevel.value?.status}',
     );
     final bool wasSolved =
         selectedLevel.value!.status == LevelProgressStatus.completed;

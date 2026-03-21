@@ -16,6 +16,11 @@ import 'package:puzzle/service/puzzle_image_loader.dart';
 part 'puzzle_game_controller_board.dart';
 part 'puzzle_game_controller_progress.dart';
 
+/// Central game state for level selection, board state, and persistence.
+///
+/// The heavy behavior is split into `part` files by concern:
+/// - progress/selection/persistence
+/// - board/drag/cluster movement
 class PuzzleGameController extends GetxController {
   static final _log = Logger('PuzzleGameController');
 
