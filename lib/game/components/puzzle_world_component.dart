@@ -1,13 +1,14 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
-
-import 'package:puzzle/game/components/board_slot_component.dart';
-import 'package:puzzle/game/components/cluster_drag_ghost_component.dart';
-import 'package:puzzle/game/components/tile_component.dart';
-import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/animation.dart';
+import 'package:puzzle/game/components/board_slot_component.dart';
+import 'package:puzzle/game/components/cluster_drag_ghost_component.dart';
+import 'package:puzzle/game/components/tile_component.dart';
+import 'package:puzzle/models/level_progress_status.dart';
+import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
 class PuzzleWorldComponent extends Component {
   PuzzleWorldComponent({required this.controller});
@@ -18,6 +19,8 @@ class PuzzleWorldComponent extends Component {
   static const double _boardInset = 3.0;
   static const double _dragSnapThreshold = 0.45;
   static const double _connectedSeamEpsilon = 0.35;
+  static const double _solvedBoardScale = 0.78;
+  static const double _boardScaleSmoothing = 2.2;
 
   final Map<int, BoardSlotComponent> _slotsByIndex =
       <int, BoardSlotComponent>{};
@@ -32,6 +35,10 @@ class PuzzleWorldComponent extends Component {
 
   double _tileWidth = 0;
   double _tileHeight = 0;
+  double _boardOriginX = _boardInset;
+  double _boardOriginY = _boardInset;
+  double _boardScale = 1.0;
+  double _targetBoardScale = 1.0;
 
   int? _dragAnchorIndex;
   int? _dragClusterId;
@@ -39,10 +46,26 @@ class PuzzleWorldComponent extends Component {
   Vector2? _dragAnchorWorldPosition;
   ClusterDragGhostComponent? _dragGhost;
 
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    if ((_boardScale - _targetBoardScale).abs() < 0.001) {
+      return;
+    }
+
+    final double t = 1 - math.exp(-_boardScaleSmoothing * dt);
+    _boardScale += (_targetBoardScale - _boardScale) * t;
+    _recomputeTileSize();
+    _layoutTiles(animate: false);
+  }
+
   void syncFromController({required ui.Image image}) {
     final int nextRows = controller.rowCount;
     final int nextColumns = controller.columnCount;
     final List<int> nextTiles = controller.tiles.toList(growable: false);
+    final bool isSolved =
+        controller.selectedLevel.value?.status == LevelProgressStatus.completed;
 
     final bool structureChanged =
         _rows != nextRows ||
@@ -54,6 +77,7 @@ class PuzzleWorldComponent extends Component {
     _columns = nextColumns;
     _tiles = nextTiles;
     _image = image;
+    _targetBoardScale = isSolved ? _solvedBoardScale : 1.0;
 
     _recomputeTileSize();
 
@@ -489,8 +513,8 @@ class PuzzleWorldComponent extends Component {
       return null;
     }
 
-    final double fractionalCol = (projected.x - _boardInset) / xStep;
-    final double fractionalRow = (projected.y - _boardInset) / yStep;
+    final double fractionalRow = (projected.y - _boardOriginY) / yStep;
+    final double fractionalCol = (projected.x - _boardOriginX) / xStep;
 
     final int targetCol = _snapIndex(fractionalCol);
     final int targetRow = _snapIndex(fractionalRow);
@@ -551,8 +575,8 @@ class PuzzleWorldComponent extends Component {
     final int row = boardIndex ~/ _columns;
     final int col = boardIndex % _columns;
     return Vector2(
-      _boardInset + col * (_tileWidth + _spacing),
-      _boardInset + row * (_tileHeight + _spacing),
+      _boardOriginX + col * (_tileWidth + _spacing),
+      _boardOriginY + row * (_tileHeight + _spacing),
     );
   }
 
@@ -567,14 +591,32 @@ class PuzzleWorldComponent extends Component {
     final double availableWidth = gameSize.x - (_boardInset * 2);
     final double availableHeight = gameSize.y - (_boardInset * 2);
 
-    _tileWidth = (availableWidth - _spacing * (_columns - 1)) / _columns;
-    _tileHeight = (availableHeight - _spacing * (_rows - 1)) / _rows;
+    final double baseTileWidth =
+        (availableWidth - _spacing * (_columns - 1)) / _columns;
+    final double baseTileHeight =
+        (availableHeight - _spacing * (_rows - 1)) / _rows;
+
+    _tileWidth = baseTileWidth * _boardScale;
+    _tileHeight = baseTileHeight * _boardScale;
 
     if (!_tileWidth.isFinite || _tileWidth < 0) {
       _tileWidth = 0;
     }
     if (!_tileHeight.isFinite || _tileHeight < 0) {
       _tileHeight = 0;
+    }
+
+    final double boardWidth = _tileWidth * _columns + _spacing * (_columns - 1);
+    final double boardHeight = _tileHeight * _rows + _spacing * (_rows - 1);
+
+    _boardOriginX = _boardInset + (availableWidth - boardWidth) / 2;
+    _boardOriginY = _boardInset + (availableHeight - boardHeight) / 2;
+
+    if (!_boardOriginX.isFinite) {
+      _boardOriginX = _boardInset;
+    }
+    if (!_boardOriginY.isFinite) {
+      _boardOriginY = _boardInset;
     }
   }
 }

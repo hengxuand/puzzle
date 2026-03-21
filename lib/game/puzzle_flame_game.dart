@@ -1,9 +1,9 @@
 import 'dart:ui' as ui;
 
+import 'package:flame/game.dart';
+import 'package:puzzle/config/app_config.dart';
 import 'package:puzzle/game/components/puzzle_world_component.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
-
-import 'package:flame/game.dart';
 
 class PuzzleFlameGame extends FlameGame {
   PuzzleFlameGame({required this.controller});
@@ -13,6 +13,9 @@ class PuzzleFlameGame extends FlameGame {
   PuzzleWorldComponent? _world;
   String _lastStateKey = '';
   ui.Image? _lastImage;
+
+  @override
+  ui.Color backgroundColor() => AppConfig.backgroundColor;
 
   @override
   Future<void> onLoad() async {
