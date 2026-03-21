@@ -1,9 +1,10 @@
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
+import 'package:puzzle/models/level_progress_status.dart';
 import 'package:puzzle/models/puzzle_difficulty.dart';
 
 class Levels {
-  static const defaultLevel = GameLevel(
+  static GameLevel defaultLevel = GameLevel(
     id: 1,
     groupId: 1,
     name: 'Green Dragon I',
@@ -11,9 +12,10 @@ class Levels {
     difficulty: PuzzleDifficulty.easiest,
     imageAssetPath: 'assets/levels/guanyu/guanyu_1.png',
     thumbnailAssetPath: 'assets/levels/guanyu/guanyu_1.png',
+    status: LevelProgressStatus.unlocked,
   );
 
-  static const List<LevelGroup> levelGroups = <LevelGroup>[
+  static List<LevelGroup> levelGroups = <LevelGroup>[
     LevelGroup(
       id: 1,
       name: 'Guan Yu',
@@ -29,6 +31,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/guanyu/guanyu_2.png',
           thumbnailAssetPath: 'assets/levels/guanyu/guanyu_2.png',
+          status: LevelProgressStatus.locked,
         ),
         3: GameLevel(
           id: 3,
@@ -38,6 +41,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/guanyu/guanyu_3.png',
           thumbnailAssetPath: 'assets/levels/guanyu/guanyu_3.png',
+          status: LevelProgressStatus.locked,
         ),
       },
     ),
@@ -55,6 +59,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_1.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_1.png',
+          status: LevelProgressStatus.unlocked,
         ),
         5: GameLevel(
           id: 5,
@@ -64,6 +69,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_2.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_2.png',
+          status: LevelProgressStatus.locked,
         ),
         6: GameLevel(
           id: 6,
@@ -73,6 +79,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/caocao/caocao_4.png',
           thumbnailAssetPath: 'assets/levels/caocao/caocao_4.png',
+          status: LevelProgressStatus.locked,
         ),
       },
     ),
@@ -90,6 +97,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_1.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_1.png',
+          status: LevelProgressStatus.unlocked,
         ),
         8: GameLevel(
           id: 8,
@@ -99,6 +107,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_2.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_2.png',
+          status: LevelProgressStatus.locked,
         ),
         9: GameLevel(
           id: 9,
@@ -108,6 +117,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/lvbu/lvbu_3.png',
           thumbnailAssetPath: 'assets/levels/lvbu/lvbu_3.png',
+          status: LevelProgressStatus.locked,
         ),
       },
     ),
@@ -125,6 +135,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_1.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_1.png',
+          status: LevelProgressStatus.unlocked,
         ),
         11: GameLevel(
           id: 11,
@@ -134,6 +145,7 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_2.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_2.png',
+          status: LevelProgressStatus.locked,
         ),
         12: GameLevel(
           id: 12,
@@ -143,18 +155,9 @@ class Levels {
           difficulty: PuzzleDifficulty.easiest,
           imageAssetPath: 'assets/levels/zhangfei/zhangfei_3.png',
           thumbnailAssetPath: 'assets/levels/zhangfei/zhangfei_3.png',
+          status: LevelProgressStatus.locked,
         ),
       },
     ),
   ];
-
-  // static final List<GameLevel> levels = <GameLevel>[
-  //   for (final LevelGroup group in levelGroups) ...group.levels,
-  // ];
-
-  // static final Map<String, int> levelSortOrderById = <String, int>{
-  //   for (final LevelGroup group in levelGroups)
-  //     for (final GameLevel level in group.levels)
-  //       level.id: group.order * 100 + level.id,
-  // };
 }

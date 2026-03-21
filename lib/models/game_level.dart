@@ -2,7 +2,7 @@ import 'package:puzzle/models/level_progress_status.dart';
 import 'package:puzzle/models/puzzle_difficulty.dart';
 
 class GameLevel {
-  const GameLevel({
+  GameLevel({
     required this.id,
     required this.groupId,
     required this.name,
@@ -20,7 +20,7 @@ class GameLevel {
   final PuzzleDifficulty difficulty;
   final String imageAssetPath;
   final String? thumbnailAssetPath;
-  final LevelProgressStatus status;
+  LevelProgressStatus status;
 
   factory GameLevel.fromJson(Map<String, dynamic> json) {
     return GameLevel(

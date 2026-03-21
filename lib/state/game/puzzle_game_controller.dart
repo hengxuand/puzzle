@@ -27,7 +27,6 @@ class PuzzleGameController extends GetxController {
   final Rxn<GameLevel> selectedLevel = Rxn<GameLevel>();
 
   final RxList<int> tiles = <int>[].obs;
-  final RxBool isSolved = false.obs;
   final imageAsync = Rx<ui.Image?>(null);
   final RxnInt hoveredTargetIndex = RxnInt();
   final RxnInt activeDragAnchorIndex = RxnInt();
@@ -382,16 +381,29 @@ class PuzzleGameController extends GetxController {
   }
 
   void _setBoardState(List<int> newTiles) {
-    final bool wasSolved = isSolved.value;
+    // final bool wasSolved = isSolved.value;
+
+    _log.fine(
+      'Selected level status before setboardstate = ${selectedLevel.value?.status}',
+    );
+    final bool wasSolved =
+        selectedLevel.value!.status == LevelProgressStatus.completed;
 
     tiles.assignAll(newTiles);
-    isSolved.value = _logic.isSolved(tiles);
-    _log.info(
-      'levelId = ${selectedLevel.value?.id ?? 'none'}, wasSolved = $wasSolved, isSolved = ${isSolved.value}',
-    );
+
+    final bool isSolved = _logic.isSolved(tiles);
+
+    selectedLevel.value!.status = isSolved
+        ? LevelProgressStatus.completed
+        : LevelProgressStatus.unlocked;
+
     _recomputeClusters();
 
-    if (!wasSolved && isSolved.value) {
+    _log.info(
+      'Board state updated. isSolved: $isSolved, level status: ${selectedLevel.value?.status}',
+    );
+
+    if (!wasSolved && isSolved) {
       _log.fine(
         'Current level ${selectedLevel.value?.id ?? 'none'} wasn\'t solved and is now solved.',
       );
@@ -404,7 +416,6 @@ class PuzzleGameController extends GetxController {
     clearSelection();
 
     tiles.clear();
-    isSolved.value = false;
     imageAsync.value = null;
     selectedLevel.value = null;
     endDrag();
