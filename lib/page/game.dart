@@ -1,39 +1,20 @@
-import 'dart:async';
-
-import 'package:puzzle/config/app_config.dart';
-import 'package:puzzle/game/puzzle_flame_game.dart';
-import 'package:puzzle/models/game_level.dart';
-import 'package:puzzle/page/welcome.dart';
-import 'package:puzzle/state/game/puzzle_game_controller.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:puzzle/config/app_config.dart';
+import 'package:puzzle/game/puzzle_flame_game.dart';
+import 'package:puzzle/page/welcome.dart';
+import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
-class GamePage extends StatefulWidget {
-  const GamePage({super.key, required this.selectedLevel});
-
-  final GameLevel selectedLevel;
-
-  @override
-  State<GamePage> createState() => _GamePageState();
-}
-
-class _GamePageState extends State<GamePage> {
-  late final PuzzleGameController _gameController;
-  late final PuzzleFlameGame _flameGame;
-
-  @override
-  void initState() {
-    super.initState();
-    _gameController = Get.find<PuzzleGameController>();
-    unawaited(_gameController.openLevel(widget.selectedLevel));
-    _flameGame = PuzzleFlameGame(controller: _gameController);
-  }
+class GamePage extends StatelessWidget {
+  const GamePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final gameController = _gameController;
+
+    final gameController = Get.find<PuzzleGameController>();
+    late final flameGame = PuzzleFlameGame(controller: gameController);
 
     return Scaffold(
       backgroundColor: AppConfig.backgroundColor,
@@ -43,7 +24,24 @@ class _GamePageState extends State<GamePage> {
             padding: const EdgeInsets.all(16),
             color: AppConfig.backgroundColor,
             child: Obx(() {
-              final GameLevel selectedLevel = widget.selectedLevel;
+              final selectedLevel = gameController.selectedLevel.value;
+
+              if (selectedLevel == null) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'No level selected.',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () => Get.off(() => const WelcomePage()),
+                      child: const Text('Go Back'),
+                    ),
+                  ],
+                );
+              }
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -63,7 +61,7 @@ class _GamePageState extends State<GamePage> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            GameWidget(game: _flameGame),
+                            GameWidget(game: flameGame),
                             if (gameController.imageAsync.value == null)
                               const ColoredBox(
                                 color: AppConfig.backgroundColor,
@@ -86,9 +84,7 @@ class _GamePageState extends State<GamePage> {
                         child: SizedBox(
                           height: 52,
                           child: ElevatedButton(
-                            onPressed: () async {
-                              Get.off(() => WelcomePage());
-                            },
+                            onPressed: () => Get.back(),
                             child: const FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(

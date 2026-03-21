@@ -6,8 +6,6 @@ import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
 import 'package:puzzle/page/game.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
-import 'package:puzzle/state/game_level_progress/game_level_controller.dart';
-import 'package:puzzle/state/game_level_progress/level_status_controller.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -16,10 +14,6 @@ class WelcomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final PuzzleGameController puzzleController =
         Get.find<PuzzleGameController>();
-    final GameLevelController gameLevelController =
-        Get.find<GameLevelController>();
-    final LevelStatusController levelStatusController =
-        Get.find<LevelStatusController>();
 
     return Scaffold(
       backgroundColor: AppConfig.backgroundColor,
@@ -27,11 +21,12 @@ class WelcomePage extends StatelessWidget {
         child: Center(
           child: Obx(() {
             final GameLevel? selectedLevel =
-                gameLevelController.selectedLevel.value;
+                puzzleController.selectedLevel.value;
 
             final List<LevelGroup> groups =
-                (gameLevelController.progressSnapshot.value?.groups.values
-                          .toList(growable: false) ??
+                (puzzleController.progressSnapshot.value?.groups.values.toList(
+                        growable: false,
+                      ) ??
                       <LevelGroup>[])
                   ..sort((a, b) => a.id.compareTo(b.id));
 
@@ -40,7 +35,7 @@ class WelcomePage extends StatelessWidget {
             }
 
             final int selectedGroupId =
-                gameLevelController.selectedGroupId.value ?? groups.first.id;
+                puzzleController.selectedGroupId.value ?? groups.first.id;
 
             final LevelGroup selectedGroup = groups.firstWhere(
               (group) => group.id == selectedGroupId,
@@ -49,6 +44,10 @@ class WelcomePage extends StatelessWidget {
 
             final List<GameLevel> levels = selectedGroup.levels.values.toList()
               ..sort((a, b) => a.id.compareTo(b.id));
+
+            final bool isSelectedLevelCompleted =
+                selectedLevel != null &&
+                puzzleController.isCompleted(selectedLevel.id);
 
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +82,7 @@ class WelcomePage extends StatelessWidget {
                                 selected: isSelected,
                                 label: Text(group.name),
                                 onSelected: (_) {
-                                  gameLevelController.selectGroup(group.id);
+                                  puzzleController.selectGroup(group.id);
                                 },
                               );
                             },
@@ -107,13 +106,12 @@ class WelcomePage extends StatelessWidget {
                                 _LevelCard(
                                   level: level,
                                   isSelected: selectedLevel?.id == level.id,
-                                  isLocked: levelStatusController.isLocked(
+                                  isLocked: puzzleController.isLocked(level.id),
+                                  isCompleted: puzzleController.isCompleted(
                                     level.id,
                                   ),
-                                  isCompleted: levelStatusController
-                                      .isCompleted(level.id),
                                   onTap: () {
-                                    gameLevelController.selectLevel(level);
+                                    puzzleController.selectLevel(level);
                                   },
                                 ),
                             ],
@@ -127,24 +125,25 @@ class WelcomePage extends StatelessWidget {
                 ElevatedButton(
                   onPressed: selectedLevel == null
                       ? null
-                      : () {
-                          Get.offAll(
-                            () => GamePage(selectedLevel: selectedLevel),
+                      : () async {
+                          await puzzleController.openLevel(
+                            selectedLevel,
+                            reshuffle: !isSelectedLevelCompleted,
                           );
+                          Get.to(() => GamePage());
                         },
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     child: Text(
-                      'Solve the Puzzle',
-                      style: TextStyle(fontSize: 18),
+                      isSelectedLevelCompleted
+                          ? 'View the puzzle'
+                          : 'Solve the Puzzle',
+                      style: const TextStyle(fontSize: 18),
                     ),
                   ),
                 ),
                 if (kDebugMode)
-                  _ResetLevelsButton(
-                    puzzleController: puzzleController,
-                    gameLevelController: gameLevelController,
-                  ),
+                  _ResetLevelsButton(puzzleController: puzzleController),
                 const SizedBox(height: 32),
               ],
             );
@@ -156,13 +155,9 @@ class WelcomePage extends StatelessWidget {
 }
 
 class _ResetLevelsButton extends StatelessWidget {
-  const _ResetLevelsButton({
-    required this.puzzleController,
-    required this.gameLevelController,
-  });
+  const _ResetLevelsButton({required this.puzzleController});
 
   final PuzzleGameController puzzleController;
-  final GameLevelController gameLevelController;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +187,6 @@ class _ResetLevelsButton extends StatelessWidget {
 
             if (confirmed == true) {
               await puzzleController.resetLevelProgress();
-              gameLevelController.clearSelection();
             }
           },
           icon: const Icon(Icons.restart_alt),
