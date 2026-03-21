@@ -5,6 +5,8 @@ import 'package:puzzle/config/app_config.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
 import 'package:puzzle/page/game.dart';
+import 'package:puzzle/page/widgets/level_card.dart';
+import 'package:puzzle/page/widgets/reset_levels_button.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -103,7 +105,7 @@ class WelcomePage extends StatelessWidget {
                           child: ListView(
                             children: [
                               for (final GameLevel level in levels)
-                                _LevelCard(
+                                LevelCard(
                                   level: level,
                                   isSelected: selectedLevel?.id == level.id,
                                   isLocked: puzzleController.isLocked(level.id),
@@ -143,156 +145,11 @@ class WelcomePage extends StatelessWidget {
                   ),
                 ),
                 if (kDebugMode)
-                  _ResetLevelsButton(puzzleController: puzzleController),
+                  ResetLevelsButton(puzzleController: puzzleController),
                 const SizedBox(height: 32),
               ],
             );
           }),
-        ),
-      ),
-    );
-  }
-}
-
-class _ResetLevelsButton extends StatelessWidget {
-  const _ResetLevelsButton({required this.puzzleController});
-
-  final PuzzleGameController puzzleController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: () async {
-            final bool? confirmed = await Get.dialog<bool>(
-              AlertDialog(
-                title: const Text('Reset Level Progress?'),
-                content: const Text(
-                  'This will clear completed levels and lock all levels except the first one.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Get.back(result: false),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Get.back(result: true),
-                    child: const Text('Reset'),
-                  ),
-                ],
-              ),
-            );
-
-            if (confirmed == true) {
-              await puzzleController.resetLevelProgress();
-            }
-          },
-          icon: const Icon(Icons.restart_alt),
-          label: const Text('Reset Levels'),
-        ),
-      ],
-    );
-  }
-}
-
-class _LevelCard extends StatelessWidget {
-  const _LevelCard({
-    required this.level,
-    required this.isSelected,
-    required this.isLocked,
-    required this.isCompleted,
-    required this.onTap,
-  });
-
-  final GameLevel level;
-  final bool isSelected;
-  final bool isLocked;
-  final bool isCompleted;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isUnlocked = !isLocked;
-    final cardBorderRadius = BorderRadius.circular(12);
-
-    return Card(
-      elevation: isSelected ? 8 : 0,
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: cardBorderRadius,
-        side: isSelected
-            ? BorderSide(
-                color: Theme.of(context).colorScheme.primary.withAlpha(128),
-                width: 3,
-              )
-            : BorderSide.none,
-      ),
-      child: InkWell(
-        borderRadius: cardBorderRadius,
-        onTap: isLocked ? null : onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: ColorFiltered(
-                    colorFilter: isUnlocked
-                        ? const ColorFilter.mode(
-                            Colors.transparent,
-                            BlendMode.srcOver,
-                          )
-                        : const ColorFilter.mode(
-                            Color(0x88000000),
-                            BlendMode.srcATop,
-                          ),
-                    child: Image.asset(
-                      level.thumbnailAssetPath ?? level.imageAssetPath,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${level.name} (Easy ${level.difficulty.displaySize})',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isUnlocked ? null : Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      level.description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isUnlocked ? null : Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-
-              if (isCompleted)
-                const Icon(Icons.check_circle, color: Colors.green)
-              else if (isLocked)
-                const Icon(Icons.lock_outline, color: Colors.grey)
-              else if (isSelected)
-                const Icon(Icons.radio_button_checked)
-              else
-                const Icon(Icons.radio_button_unchecked),
-            ],
-          ),
         ),
       ),
     );
