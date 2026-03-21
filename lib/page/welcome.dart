@@ -1,22 +1,35 @@
+import 'package:flame/game.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:puzzle/config/app_config.dart';
+import 'package:puzzle/game/welcome_selection_flame_game.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
 import 'package:puzzle/page/game.dart';
-import 'package:puzzle/page/widgets/level_card.dart';
 import 'package:puzzle/page/widgets/reset_levels_button.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
-class WelcomePage extends StatelessWidget {
+class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PuzzleGameController puzzleController =
-        Get.find<PuzzleGameController>();
+  State<WelcomePage> createState() => _WelcomePageState();
+}
 
+class _WelcomePageState extends State<WelcomePage> {
+  late final PuzzleGameController puzzleController;
+  late final WelcomeSelectionFlameGame flameGame;
+
+  @override
+  void initState() {
+    super.initState();
+    puzzleController = Get.find<PuzzleGameController>();
+    flameGame = WelcomeSelectionFlameGame(controller: puzzleController);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppConfig.backgroundColor,
       body: SafeArea(
@@ -30,7 +43,13 @@ class WelcomePage extends StatelessWidget {
                         growable: false,
                       ) ??
                       <LevelGroup>[])
-                  ..sort((a, b) => a.id.compareTo(b.id));
+                  ..sort((a, b) {
+                    final int byOrder = a.order.compareTo(b.order);
+                    if (byOrder != 0) {
+                      return byOrder;
+                    }
+                    return a.id.compareTo(b.id);
+                  });
 
             if (groups.isEmpty) {
               return const SizedBox.shrink();
@@ -43,9 +62,6 @@ class WelcomePage extends StatelessWidget {
               (group) => group.id == selectedGroupId,
               orElse: () => groups.first,
             );
-
-            final List<GameLevel> levels = selectedGroup.levels.values.toList()
-              ..sort((a, b) => a.id.compareTo(b.id));
 
             final bool isSelectedLevelCompleted =
                 selectedLevel != null &&
@@ -64,62 +80,12 @@ class WelcomePage extends StatelessWidget {
                   'Choose a story to start your puzzle adventure!',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: 20),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 70,
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, index) {
-                              final LevelGroup group = groups[index];
-                              final bool isSelected =
-                                  selectedGroup.id == group.id;
-
-                              return ChoiceChip(
-                                selected: isSelected,
-                                label: Text(group.name),
-                                onSelected: (_) {
-                                  puzzleController.selectGroup(group.id);
-                                },
-                              );
-                            },
-                            separatorBuilder: (_, index) =>
-                                const SizedBox(width: 8),
-                            itemCount: groups.length,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            selectedGroup.description,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ),
-                        Expanded(
-                          child: ListView(
-                            children: [
-                              for (final GameLevel level in levels)
-                                LevelCard(
-                                  level: level,
-                                  isSelected: selectedLevel?.id == level.id,
-                                  isLocked: puzzleController.isLocked(level.id),
-                                  isCompleted: puzzleController.isCompleted(
-                                    level.id,
-                                  ),
-                                  onTap: () {
-                                    puzzleController.selectLevel(level);
-                                  },
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: GameWidget(game: flameGame),
                     ),
                   ),
                 ),
