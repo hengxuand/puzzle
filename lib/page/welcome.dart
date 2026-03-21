@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:puzzle/config/app_config.dart';
@@ -127,49 +128,77 @@ class WelcomePage extends StatelessWidget {
                   onPressed: selectedLevel == null
                       ? null
                       : () {
-                          Get.to(() => GamePage(selectedLevel: selectedLevel));
+                          Get.offAll(
+                            () => GamePage(selectedLevel: selectedLevel),
+                          );
                         },
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    child: Text('Start Game', style: TextStyle(fontSize: 18)),
+                    child: Text(
+                      'Solve the Puzzle',
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () async {
-                    final bool? confirmed = await Get.dialog<bool>(
-                      AlertDialog(
-                        title: const Text('Reset Level Progress?'),
-                        content: const Text(
-                          'This will clear completed levels and lock all levels except the first one.',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Get.back(result: false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Get.back(result: true),
-                            child: const Text('Reset'),
-                          ),
-                        ],
-                      ),
-                    );
-
-                    if (confirmed == true) {
-                      await puzzleController.resetLevelProgress();
-                      gameLevelController.clearSelection();
-                    }
-                  },
-                  icon: const Icon(Icons.restart_alt),
-                  label: const Text('Reset Levels'),
-                ),
+                if (kDebugMode)
+                  _ResetLevelsButton(
+                    puzzleController: puzzleController,
+                    gameLevelController: gameLevelController,
+                  ),
                 const SizedBox(height: 32),
               ],
             );
           }),
         ),
       ),
+    );
+  }
+}
+
+class _ResetLevelsButton extends StatelessWidget {
+  const _ResetLevelsButton({
+    required this.puzzleController,
+    required this.gameLevelController,
+  });
+
+  final PuzzleGameController puzzleController;
+  final GameLevelController gameLevelController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () async {
+            final bool? confirmed = await Get.dialog<bool>(
+              AlertDialog(
+                title: const Text('Reset Level Progress?'),
+                content: const Text(
+                  'This will clear completed levels and lock all levels except the first one.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Get.back(result: false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Get.back(result: true),
+                    child: const Text('Reset'),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirmed == true) {
+              await puzzleController.resetLevelProgress();
+              gameLevelController.clearSelection();
+            }
+          },
+          icon: const Icon(Icons.restart_alt),
+          label: const Text('Reset Levels'),
+        ),
+      ],
     );
   }
 }

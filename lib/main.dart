@@ -45,7 +45,7 @@ class PuzzleApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: WelcomePage(),
+      home: const WelcomePage(),
     );
   }
 }
