@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flame/game.dart';
-import 'package:puzzle/config/app_config.dart';
+import 'package:flutter/material.dart';
 import 'package:puzzle/game/components/welcome_selector_world_component.dart';
 import 'package:puzzle/models/level_group.dart';
 import 'package:puzzle/models/level_progress_status.dart';
@@ -16,7 +16,8 @@ class WelcomeSelectionFlameGame extends FlameGame {
   String _lastStateKey = '';
 
   @override
-  ui.Color backgroundColor() => AppConfig.backgroundColor;
+  // ui.Color backgroundColor() => AppConfig.backgroundColor;
+  ui.Color backgroundColor() => Colors.black;
 
   @override
   Future<void> onLoad() async {

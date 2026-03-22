@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
 
@@ -17,6 +18,8 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     required this.isLocked,
     required this.isCompleted,
   }) : super(anchor: Anchor.topLeft, priority: 1);
+
+  final _log = Logger('WelcomeSelectorWorldComponent');
 
   final void Function(int groupId) onGroupChanged;
   final void Function(GameLevel level) onLevelTapped;
@@ -334,10 +337,19 @@ class WelcomeSelectorWorldComponent extends PositionComponent
 
   Rect _levelsViewportRect(Rect cardRect) {
     final double horizontalPadding = math.max(16, cardRect.width * 0.055);
-    final double topInset = math.max(132, cardRect.height * 0.34);
+    final double topInset = math.max(100, cardRect.height * 0.08);
     final double bottomInset = math.max(20, cardRect.height * 0.08);
     final double width = math.max(1, cardRect.width - (horizontalPadding * 2));
     final double height = math.max(1, cardRect.height - topInset - bottomInset);
+    // Log the dimensions of the levels viewport rect
+    // _log.fine(
+    //   'Levels viewport rect: '
+    //   'horizontalPadding=${horizontalPadding.toStringAsFixed(2)}, '
+    //   'topInset=${topInset.toStringAsFixed(2)}, '
+    //   'bottomInset=${bottomInset.toStringAsFixed(2)}, '
+    //   'width=${width.toStringAsFixed(2)}, '
+    //   'height=${height.toStringAsFixed(2)}',
+    // );
 
     return Rect.fromLTWH(
       cardRect.left + horizontalPadding,
@@ -458,7 +470,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     );
     final RRect cardShape = RRect.fromRectAndRadius(
       animatedRect,
-      const Radius.circular(26),
+      const Radius.circular(8),
     );
 
     final Paint shadowPaint = Paint()
@@ -537,7 +549,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     final Rect listRect = _levelsViewportRect(animatedRect);
     final RRect listShape = RRect.fromRectAndRadius(
       listRect,
-      const Radius.circular(18),
+      const Radius.circular(8),
     );
     canvas.drawRRect(
       listShape,
@@ -653,11 +665,11 @@ class WelcomeSelectorWorldComponent extends PositionComponent
           ? const Color(0xFFF4D9A9)
           : (locked ? const Color(0xFFECECEC) : const Color(0xFFF9F6EF));
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(12)),
+        RRect.fromRectAndRadius(rowRect, const Radius.circular(2)),
         Paint()..color = rowColor.withAlpha(alpha),
       );
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(12)),
+        RRect.fromRectAndRadius(rowRect, const Radius.circular(2)),
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1

@@ -55,14 +55,6 @@ class _WelcomePageState extends State<WelcomePage> {
               return const SizedBox.shrink();
             }
 
-            final int selectedGroupId =
-                puzzleController.selectedGroupId.value ?? groups.first.id;
-
-            final LevelGroup selectedGroup = groups.firstWhere(
-              (group) => group.id == selectedGroupId,
-              orElse: () => groups.first,
-            );
-
             final bool isSelectedLevelCompleted =
                 selectedLevel != null &&
                 puzzleController.isCompleted(selectedLevel.id);
@@ -82,7 +74,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: GameWidget(game: flameGame),
@@ -101,7 +93,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           Get.to(() => GamePage());
                         },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     child: Text(
                       isSelectedLevelCompleted
                           ? 'View the puzzle'
