@@ -6,6 +6,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:puzzle/page/welcome.dart';
 import 'package:puzzle/state/puzzle_dependencies_binding.dart';
+import 'package:puzzle/theme/app_colors.dart';
+import 'package:puzzle/theme/app_theme.dart';
 
 Future<void> main() async {
   _configureLogging();
@@ -35,16 +37,15 @@ class PuzzleApp extends StatelessWidget {
       title: 'Puzzle',
       initialBinding: PuzzleDependenciesBinding(),
       builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-        value: const SystemUiOverlayStyle(
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
+        value: SystemUiOverlayStyle(
+          statusBarColor: AppColors.transparent,
+          systemNavigationBarColor: AppColors.transparent,
         ),
         child: child!,
       ),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
       home: const WelcomePage(),
     );
   }

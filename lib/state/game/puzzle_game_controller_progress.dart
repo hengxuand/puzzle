@@ -2,6 +2,7 @@ part of 'puzzle_game_controller.dart';
 
 /// Handles level catalog selection, unlock/completion persistence, and reset flows.
 extension PuzzleGameControllerProgress on PuzzleGameController {
+
   Future<LevelProgressSnapshot> loadProgress() async {
     final LevelProgressSnapshot? snapshot = _storageService
         .loadProgressSnapshot();

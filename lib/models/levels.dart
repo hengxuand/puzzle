@@ -22,7 +22,16 @@ class Levels {
       description: 'Steady tactical boards.',
       order: 1,
       levels: <int, GameLevel>{
-        1: defaultLevel,
+        1: GameLevel(
+          id: 1,
+          groupId: 1,
+          name: 'Green Dragon I',
+          description: 'Easy mode training board.',
+          difficulty: PuzzleDifficulty.easiest,
+          imageAssetPath: 'assets/images/levels/guanyu/guanyu_1.png',
+          thumbnailAssetPath: 'assets/images/levels/guanyu/guanyu_1.png',
+          status: LevelProgressStatus.unlocked,
+        ),
         2: GameLevel(
           id: 2,
           groupId: 1,

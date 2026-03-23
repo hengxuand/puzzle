@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:puzzle/theme/app_colors.dart';
 
 class AppConfig {
   const AppConfig._();
 
-  static const Color backgroundColor = Color.fromARGB(255, 153, 176, 206);
+  static const Color backgroundColor = AppColors.flameBackground;
 }

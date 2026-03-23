@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flutter/material.dart';
+import 'package:puzzle/theme/app_colors.dart';
 
 class TileComponent extends SpriteComponent with DragCallbacks {
   TileComponent({
@@ -112,7 +114,7 @@ class TileComponent extends SpriteComponent with DragCallbacks {
     final Paint borderPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
-      ..color = const Color(0x00000000);
+      ..color = AppColors.transparent;
 
     final double width = size.x;
     final double height = size.y;

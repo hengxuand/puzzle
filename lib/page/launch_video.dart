@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:puzzle/page/welcome.dart';
+import 'package:puzzle/theme/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
 class LaunchVideoPage extends StatefulWidget {
@@ -109,7 +110,7 @@ class _LaunchVideoPageState extends State<LaunchVideoPage> {
     final VideoPlayerController? controller = _controller;
     if (_initializationError != null) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.black,
         body: Center(
           child: TextButton(
             onPressed: _goToWelcome,
@@ -121,13 +122,13 @@ class _LaunchVideoPageState extends State<LaunchVideoPage> {
 
     if (controller == null || !controller.value.isInitialized) {
       return const Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.black,
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.black,
       body: SizedBox.expand(
         child: FittedBox(
           fit: BoxFit.cover,
