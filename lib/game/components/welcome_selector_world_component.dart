@@ -30,7 +30,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   static const double _cardWidthFactor = 0.78;
   static const double _cardHeightFactor = 0.84;
   static const double _cardSpacingFactor = 0.98;
-  static const double _levelRowHeight = 54;
+  static const double _levelRowHeight = 60;
   static const double _snapSettleSpeed = 16.0;
   static const double _snapThresholdFactor = 0.13;
 
@@ -613,12 +613,12 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       text: '$completedLevels/$totalLevels completed',
       rect: Rect.fromLTWH(
         animatedRect.right - 150,
-        animatedRect.top + 18,
+        animatedRect.top + 28,
         134,
         18,
       ),
       style: const TextStyle(
-        fontSize: 11,
+        fontSize: 14,
         color: Color(0xFF4A5E78),
         fontWeight: FontWeight.w700,
       ),
@@ -665,9 +665,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       final double top = yStart + (i * _levelRowHeight);
       final Rect rowRect = Rect.fromLTWH(
         listRect.left + 8,
-        top + 4,
+        top + 8,
         listRect.width - 16,
-        _levelRowHeight - 8,
+        _levelRowHeight - 4,
       );
 
       final bool locked = isLocked(level.id);
@@ -678,11 +678,11 @@ class WelcomeSelectorWorldComponent extends PositionComponent
           ? const Color(0xFFF4D9A9)
           : (locked ? const Color(0xFFECECEC) : const Color(0xFFF9F6EF));
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(2)),
+        RRect.fromRectAndRadius(rowRect, const Radius.circular(4)),
         Paint()..color = rowColor.withAlpha(alpha),
       );
       canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(2)),
+        RRect.fromRectAndRadius(rowRect, const Radius.circular(4)),
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1
@@ -699,10 +699,10 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       final ui.Image? thumbnail = _imageCache[thumbnailPath];
       if (thumbnail != null) {
         final Rect thumbnailRect = Rect.fromLTWH(
-          rowRect.left + 10,
-          rowRect.top + (rowRect.height - 36) / 2,
-          36,
-          36,
+          rowRect.left + 6,
+          rowRect.top + (rowRect.height - 48) / 2,
+          42,
+          48,
         );
 
         // Apply grayscale filter for locked levels
