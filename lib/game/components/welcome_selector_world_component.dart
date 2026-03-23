@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
-import 'package:puzzle/theme/app_colors.dart';
 
 enum _DragMode { undecided, horizontal, vertical }
 
@@ -419,7 +418,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         text: 'No stories available yet.',
         style: const TextStyle(
           fontSize: 20,
-          color: AppColors.welcomeText,
+          color: Color(0xFF1E2E45),
           fontWeight: FontWeight.w700,
         ),
       );
@@ -488,7 +487,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     );
 
     final Paint shadowPaint = Paint()
-      ..color = AppColors.flameCardShadow.withAlpha((56 * alphaFactor).round());
+      ..color = Color.fromARGB((56 * alphaFactor).round(), 27, 36, 52);
     canvas.drawRRect(cardShape.shift(const Offset(0, 6)), shadowPaint);
 
     final Paint cardFill = Paint()
@@ -497,32 +496,17 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         Offset(animatedRect.right, animatedRect.bottom),
         <Color>[
           Color.lerp(
-                Color.fromARGB(
-                  alpha,
-                  AppColors.flameCardFront.red,
-                  AppColors.flameCardFront.green,
-                  AppColors.flameCardFront.blue,
-                ),
-                Color.fromARGB(
-                  alpha,
-                  AppColors.flameCardBack.red,
-                  AppColors.flameCardBack.green,
-                  AppColors.flameCardBack.blue,
-                ),
+                Color.fromARGB(alpha, 243, 238, 230),
+                Color.fromARGB(alpha, 251, 239, 218),
                 focusStrength,
               ) ??
-              AppColors.flameCardFront,
+              Color.fromARGB(alpha, 243, 238, 230),
           Color.lerp(
-                Color.fromARGB(
-                  alpha,
-                  AppColors.flameCardSide.red,
-                  AppColors.flameCardSide.green,
-                  AppColors.flameCardSide.blue,
-                ),
-                AppColors.flameCardSide,
+                Color.fromARGB(alpha, 231, 227, 220),
+                Color.fromARGB(alpha, 240, 225, 196),
                 focusStrength,
               ) ??
-              AppColors.flameCardSide,
+              Color.fromARGB(alpha, 231, 227, 220),
         ],
       );
     final Paint cardBorder = Paint()
@@ -530,26 +514,11 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       ..strokeWidth = ui.lerpDouble(1.4, 2.6, focusStrength) ?? 2
       ..color =
           Color.lerp(
-            Color.fromARGB(
-              alpha,
-              AppColors.flameTextPrimary.red,
-              AppColors.flameTextPrimary.green,
-              AppColors.flameTextPrimary.blue,
-            ),
-            Color.fromARGB(
-              alpha,
-              AppColors.flameSelectedBorder.red,
-              AppColors.flameSelectedBorder.green,
-              AppColors.flameSelectedBorder.blue,
-            ),
+            Color.fromARGB(alpha, 76, 94, 122),
+            Color.fromARGB(alpha, 132, 68, 32),
             focusStrength,
           ) ??
-          Color.fromARGB(
-            alpha,
-            AppColors.flameTextPrimary.red,
-            AppColors.flameTextPrimary.green,
-            AppColors.flameTextPrimary.blue,
-          );
+          Color.fromARGB(alpha, 76, 94, 122);
 
     canvas.drawRRect(cardShape, cardFill);
     canvas.drawRRect(cardShape, cardBorder);
@@ -567,7 +536,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       rect: headerRect,
       style: TextStyle(
         fontSize: ui.lerpDouble(22, 28, focusStrength) ?? 24,
-        color: AppColors.flameCardShadow,
+        color: const Color(0xFF241B14),
         fontWeight: FontWeight.w800,
       ),
     );
@@ -584,7 +553,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       rect: descriptionRect,
       style: TextStyle(
         fontSize: ui.lerpDouble(12.5, 14, focusStrength) ?? 13,
-        color: AppColors.flameCardHighlight,
+        color: const Color(0xFF3A4B61),
         fontWeight: FontWeight.w500,
       ),
       maxLines: 2,
@@ -602,12 +571,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
           Offset(listRect.left, listRect.top),
           Offset(listRect.right, listRect.bottom),
           <Color>[
-            Color.fromARGB(
-              alpha,
-              AppColors.flameCardBack.red,
-              AppColors.flameCardBack.green,
-              AppColors.flameCardBack.blue,
-            ),
+            Color.fromARGB(alpha, 251, 248, 241),
             Color.fromARGB(alpha, 243, 238, 228),
           ],
         ),
@@ -632,7 +596,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       ),
       style: const TextStyle(
         fontSize: 12,
-        color: AppColors.flameTextPrimary,
+        color: Color(0xFF55667D),
         fontWeight: FontWeight.w600,
       ),
       textAlign: TextAlign.center,
@@ -655,7 +619,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       ),
       style: const TextStyle(
         fontSize: 14,
-        color: AppColors.flameTextSecondary,
+        color: Color(0xFF4A5E78),
         fontWeight: FontWeight.w700,
       ),
       textAlign: TextAlign.right,
@@ -679,7 +643,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         rect: listRect,
         style: const TextStyle(
           fontSize: 16,
-          color: AppColors.flameButton,
+          color: Color(0xFF64748B),
           fontWeight: FontWeight.w600,
         ),
         textAlign: TextAlign.center,
@@ -711,8 +675,8 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       final bool selected = _selectedLevelId == level.id;
 
       final Color rowColor = selected
-          ? AppColors.flameRowEven
-          : (locked ? AppColors.flameRowLocked : AppColors.flameRowOdd);
+          ? const Color(0xFFF4D9A9)
+          : (locked ? const Color(0xFFECECEC) : const Color(0xFFF9F6EF));
       canvas.drawRRect(
         RRect.fromRectAndRadius(rowRect, const Radius.circular(4)),
         Paint()..color = rowColor.withAlpha(alpha),
@@ -723,9 +687,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1
           ..color =
-              (selected
-                      ? AppColors.flameSelectedBorder
-                      : AppColors.flameUnselectedBorder)
+              (selected ? const Color(0xFF9C6936) : const Color(0xFFD0C7B8))
                   .withAlpha(alpha),
       );
 
@@ -798,7 +760,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
 
         // Draw placeholder
         final Paint placeholderPaint = Paint()
-          ..color = locked ? AppColors.flameRowLocked : AppColors.surface;
+          ..color = locked ? const Color(0xFFE0E0E0) : const Color(0xFFF0F0F0);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromLTWH(
@@ -820,10 +782,8 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         style: TextStyle(
           fontSize: 10,
           color: locked
-              ? AppColors.levelCardLockedText
-              : (completed
-                    ? AppColors.levelCardCompleted
-                    : AppColors.levelCardText),
+              ? const Color(0xFF7A7A7A)
+              : (completed ? const Color(0xFF2D7D54) : const Color(0xFF7A4E24)),
           fontWeight: FontWeight.w700,
           letterSpacing: 0.7,
         ),
@@ -842,7 +802,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         ),
         style: const TextStyle(
           fontSize: 14,
-          color: AppColors.flameNumberBackground,
+          color: Color(0xFF213147),
           fontWeight: FontWeight.w700,
         ),
       );
@@ -857,7 +817,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         ),
         style: const TextStyle(
           fontSize: 11,
-          color: AppColors.flameNumberText,
+          color: Color(0xFF57667A),
           fontWeight: FontWeight.w500,
         ),
       );
@@ -869,7 +829,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
           rect: Rect.fromLTWH(rowRect.right - 18, rowRect.top + 16, 10, 14),
           style: const TextStyle(
             fontSize: 14,
-            color: AppColors.flameNumberShadow,
+            color: Color(0xFF5B6D84),
             fontWeight: FontWeight.w700,
           ),
         );
@@ -891,7 +851,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(thumbRect, const Radius.circular(3)),
-        Paint()..color = AppColors.highlightOverlay,
+        Paint()..color = const Color(0x8876879A),
       );
     }
   }
@@ -914,12 +874,8 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         radius,
         Paint()
           ..color =
-              Color.lerp(
-                AppColors.flameHoverOverlay,
-                AppColors.flameHoverSelected,
-                t,
-              ) ??
-              AppColors.flameHoverOverlay,
+              Color.lerp(const Color(0x8894A4B8), const Color(0xFF815327), t) ??
+              const Color(0x8894A4B8),
       );
     }
   }

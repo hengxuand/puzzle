@@ -1,8 +1,6 @@
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
-import 'package:puzzle/theme/app_colors.dart';
 
 class BoardSlotComponent extends PositionComponent {
   BoardSlotComponent({required this.boardIndex})
@@ -20,7 +18,7 @@ class BoardSlotComponent extends PositionComponent {
 
     final Paint fillPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = AppColors.emptySlot;
+      ..color = const Color.fromARGB(77, 111, 126, 111);
 
     canvas.drawRect(size.toRect(), fillPaint);
   }
