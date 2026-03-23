@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:puzzle/models/game_level.dart';
 import 'package:puzzle/models/level_group.dart';
@@ -36,6 +37,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   List<LevelGroup> _groups = <LevelGroup>[];
   Map<int, List<GameLevel>> _sortedLevelsByGroup = <int, List<GameLevel>>{};
   final Map<int, double> _verticalScrollOffsets = <int, double>{};
+  final Map<String, ui.Image> _imageCache = <String, ui.Image>{};
 
   int _activeIndex = 0;
   int? _selectedLevelId;
@@ -111,6 +113,17 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       _verticalScrollOffsets[group.id] ??= 0;
       _verticalScrollOffsets[group.id] = _verticalScrollOffsets[group.id]!
           .clamp(0, _maxVerticalScrollForGroup(group.id));
+    }
+
+    // Preload thumbnails for all levels
+    for (final GameLevel level in _sortedLevelsByGroup.values.expand(
+      (l) => l,
+    )) {
+      final String thumbnailPath =
+          level.thumbnailAssetPath ?? level.imageAssetPath;
+      if (!_imageCache.containsKey(thumbnailPath)) {
+        _loadThumbnail(thumbnailPath);
+      }
     }
 
     if (_groups.isEmpty) {
@@ -679,10 +692,93 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       );
 
       final String leading = locked ? 'LOCK' : (completed ? 'DONE' : 'PLAY');
+
+      // Draw thumbnail
+      final String thumbnailPath =
+          level.thumbnailAssetPath ?? level.imageAssetPath;
+      final ui.Image? thumbnail = _imageCache[thumbnailPath];
+      if (thumbnail != null) {
+        final Rect thumbnailRect = Rect.fromLTWH(
+          rowRect.left + 10,
+          rowRect.top + (rowRect.height - 36) / 2,
+          36,
+          36,
+        );
+
+        // Apply grayscale filter for locked levels
+        if (locked) {
+          final Paint grayscalePaint = Paint()
+            ..colorFilter = const ColorFilter.matrix(<double>[
+              0.2126,
+              0.7152,
+              0.0722,
+              0,
+              0,
+              0.2126,
+              0.7152,
+              0.0722,
+              0,
+              0,
+              0.2126,
+              0.7152,
+              0.0722,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+            ]);
+          canvas.drawImageRect(
+            thumbnail,
+            Rect.fromLTWH(
+              0.0,
+              0.0,
+              thumbnail.width.toDouble(),
+              thumbnail.height.toDouble(),
+            ),
+            thumbnailRect,
+            grayscalePaint,
+          );
+        } else {
+          canvas.drawImageRect(
+            thumbnail,
+            Rect.fromLTWH(
+              0.0,
+              0.0,
+              thumbnail.width.toDouble(),
+              thumbnail.height.toDouble(),
+            ),
+            thumbnailRect,
+            Paint(),
+          );
+        }
+      } else {
+        // Load thumbnail asynchronously
+        _loadThumbnail(thumbnailPath);
+
+        // Draw placeholder
+        final Paint placeholderPaint = Paint()
+          ..color = locked ? const Color(0xFFE0E0E0) : const Color(0xFFF0F0F0);
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromLTWH(
+              rowRect.left + 10,
+              rowRect.top + (rowRect.height - 36) / 2,
+              36,
+              36,
+            ),
+            const Radius.circular(4),
+          ),
+          placeholderPaint,
+        );
+      }
+
       _drawSingleLineText(
         canvas,
         text: leading,
-        rect: Rect.fromLTWH(rowRect.left + 10, rowRect.top + 8, 50, 18),
+        rect: Rect.fromLTWH(rowRect.left + 54, rowRect.top + 8, 50, 18),
         style: TextStyle(
           fontSize: 10,
           color: locked
@@ -699,9 +795,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         canvas,
         text: level.name,
         rect: Rect.fromLTWH(
-          rowRect.left + 64,
+          rowRect.left + 108,
           rowRect.top + 6,
-          rowRect.width - 74,
+          rowRect.width - 118,
           21,
         ),
         style: const TextStyle(
@@ -714,9 +810,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         canvas,
         text: subtitle,
         rect: Rect.fromLTWH(
-          rowRect.left + 64,
+          rowRect.left + 108,
           rowRect.top + 24,
-          rowRect.width - 74,
+          rowRect.width - 118,
           18,
         ),
         style: const TextStyle(
@@ -847,5 +943,24 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     }
 
     painter.paint(canvas, Offset(dx, rect.top));
+  }
+
+  Future<ui.Image?> _loadThumbnail(String assetPath) async {
+    if (_imageCache.containsKey(assetPath)) {
+      return _imageCache[assetPath];
+    }
+
+    try {
+      final ByteData data = await rootBundle.load(assetPath);
+      final Uint8List bytes = data.buffer.asUint8List();
+      final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      final ui.Image image = frameInfo.image;
+      _imageCache[assetPath] = image;
+      return image;
+    } catch (e) {
+      _log.warning('Failed to load thumbnail: $assetPath', e);
+      return null;
+    }
   }
 }
