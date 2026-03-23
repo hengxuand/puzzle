@@ -26,10 +26,10 @@ flutter:
   uses-material-design: true
   assets:
     - assets/intro/
-    - assets/levels/guanyu/
-    - assets/levels/caocao/
-    - assets/levels/lvbu/
-    - assets/levels/zhangfei/
+    - assets/images/levels/caocao/
+    - assets/images/levels/guanyu/
+    - assets/images/levels/lvbu/
+    - assets/images/levels/zhangfei/
 
 flutter_launcher_icons:
   android: "launcher_icon"
