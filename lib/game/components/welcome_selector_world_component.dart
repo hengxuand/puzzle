@@ -30,7 +30,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   static const double _cardWidthFactor = 0.78;
   static const double _cardHeightFactor = 0.84;
   static const double _cardSpacingFactor = 0.98;
-  static const double _levelRowHeight = 60;
+  static const double _levelRowHeight = 85;
   static const double _snapSettleSpeed = 16.0;
   static const double _snapThresholdFactor = 0.13;
 
@@ -664,10 +664,10 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       final GameLevel level = levels[rowIndex];
       final double top = yStart + (i * _levelRowHeight);
       final Rect rowRect = Rect.fromLTWH(
-        listRect.left + 8,
-        top + 8,
-        listRect.width - 16,
-        _levelRowHeight - 4,
+        listRect.left + 10,
+        top + 10,
+        listRect.width - 20,
+        _levelRowHeight - 10,
       );
 
       final bool locked = isLocked(level.id);
@@ -699,10 +699,10 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       final ui.Image? thumbnail = _imageCache[thumbnailPath];
       if (thumbnail != null) {
         final Rect thumbnailRect = Rect.fromLTWH(
-          rowRect.left + 6,
-          rowRect.top + (rowRect.height - 48) / 2,
-          42,
-          48,
+          rowRect.left + 10,
+          rowRect.top + (rowRect.height - 70) / 2,
+          60,
+          70,
         );
 
         // Apply grayscale filter for locked levels
@@ -775,22 +775,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         );
       }
 
-      _drawSingleLineText(
-        canvas,
-        text: leading,
-        rect: Rect.fromLTWH(rowRect.left + 54, rowRect.top + 8, 50, 18),
-        style: TextStyle(
-          fontSize: 10,
-          color: locked
-              ? const Color(0xFF7A7A7A)
-              : (completed ? const Color(0xFF2D7D54) : const Color(0xFF7A4E24)),
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.7,
-        ),
-      );
-
-      final String subtitle =
-          '${level.difficulty.displaySize}  -  Level ${level.id}';
+      final String subtitle = level.difficulty.displaySize;
       _drawSingleLineText(
         canvas,
         text: level.name,
@@ -811,22 +796,39 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         text: subtitle,
         rect: Rect.fromLTWH(
           rowRect.left + 108,
-          rowRect.top + 24,
+          rowRect.top + 32,
           rowRect.width - 118,
           18,
         ),
         style: const TextStyle(
-          fontSize: 11,
+          fontSize: 12,
           color: Color(0xFF57667A),
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       );
-
+      _drawSingleLineText(
+        canvas,
+        text: leading,
+        rect: Rect.fromLTWH(rowRect.right - 38, rowRect.top + 8, 50, 18),
+        style: TextStyle(
+          fontSize: 10,
+          color: locked
+              ? const Color(0xFF7A7A7A)
+              : (completed ? const Color(0xFF2D7D54) : const Color(0xFF7A4E24)),
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.7,
+        ),
+      );
       if (!locked) {
         _drawSingleLineText(
           canvas,
           text: '>',
-          rect: Rect.fromLTWH(rowRect.right - 18, rowRect.top + 16, 10, 14),
+          rect: Rect.fromLTWH(
+            rowRect.right - 28,
+            rowRect.top + (rowRect.height - 24) / 2,
+            20,
+            24,
+          ),
           style: const TextStyle(
             fontSize: 14,
             color: Color(0xFF5B6D84),

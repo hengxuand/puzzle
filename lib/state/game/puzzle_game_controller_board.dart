@@ -166,11 +166,10 @@ extension PuzzleGameControllerBoard on PuzzleGameController {
   void _recomputeClusters() {
     final Map<int, Set<int>> clusters = _logic.buildConnectedClusters(
       tiles: tiles,
-      rows:
-          selectedLevel.value?.difficulty.rows ?? PuzzleDifficulty.easiest.rows,
+      rows: selectedLevel.value?.difficulty.rows ?? PuzzleDifficulty.easy.rows,
       columns:
           selectedLevel.value?.difficulty.columns ??
-          PuzzleDifficulty.easiest.columns,
+          PuzzleDifficulty.easy.columns,
     );
 
     final Map<int, int> clusterLookup = <int, int>{};

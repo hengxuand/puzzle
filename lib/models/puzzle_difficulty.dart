@@ -1,7 +1,7 @@
 enum PuzzleDifficulty {
-  easiest._(label: 'Easy', rows: 3, columns: 2),
-  mid._(label: 'Medium', rows: 3, columns: 2),
-  hardest._(label: 'Hard', rows: 3, columns: 2);
+  easy._(label: 'Easy', rows: 5, columns: 4),
+  mid._(label: 'Medium', rows: 7, columns: 6),
+  hard._(label: 'Hard', rows: 9, columns: 8);
 
   const PuzzleDifficulty._({
     required this.label,
@@ -15,12 +15,12 @@ enum PuzzleDifficulty {
 
   static PuzzleDifficulty fromWire(String? value) {
     switch (value) {
-      case 'easiest':
-        return PuzzleDifficulty.easiest;
+      case 'easy':
+        return PuzzleDifficulty.easy;
       case 'mid':
         return PuzzleDifficulty.mid;
-      case 'hardest':
-        return PuzzleDifficulty.hardest;
+      case 'hard':
+        return PuzzleDifficulty.hard;
       default:
         return fromLabel(value);
     }
@@ -29,15 +29,15 @@ enum PuzzleDifficulty {
   static PuzzleDifficulty fromLabel(String? value) {
     switch (value) {
       case 'Easy':
-        return PuzzleDifficulty.easiest;
+        return PuzzleDifficulty.easy;
       case 'Medium':
         return PuzzleDifficulty.mid;
       case 'Hard':
-        return PuzzleDifficulty.hardest;
+        return PuzzleDifficulty.hard;
       default:
-        return PuzzleDifficulty.easiest;
+        return PuzzleDifficulty.easy;
     }
   }
 
-  String get displaySize => '${rows}x$columns';
+  String get displaySize => '${columns}x$rows';
 }

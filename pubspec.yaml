@@ -26,7 +26,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/intro/
-    - assets/images/levels/caocao/
+    - assets/images/levels/
     - assets/images/levels/guanyu/
     - assets/images/levels/lvbu/
     - assets/images/levels/zhangfei/

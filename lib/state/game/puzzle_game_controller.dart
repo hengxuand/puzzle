@@ -43,10 +43,9 @@ class PuzzleGameController extends GetxController {
   final RxMap<int, List<int>> clusterIdToBoardIndices = <int, List<int>>{}.obs;
 
   int get rowCount =>
-      selectedLevel.value?.difficulty.rows ?? PuzzleDifficulty.easiest.rows;
+      selectedLevel.value?.difficulty.rows ?? PuzzleDifficulty.easy.rows;
   int get columnCount =>
-      selectedLevel.value?.difficulty.columns ??
-      PuzzleDifficulty.easiest.columns;
+      selectedLevel.value?.difficulty.columns ?? PuzzleDifficulty.easy.columns;
 
   @override
   void onInit() {
