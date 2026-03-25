@@ -27,9 +27,6 @@ flutter:
   assets:
     - assets/intro/
     - assets/images/levels/
-    - assets/images/levels/guanyu/
-    - assets/images/levels/lvbu/
-    - assets/images/levels/zhangfei/
 
 flutter_launcher_icons:
   android: "launcher_icon"
