@@ -6,6 +6,10 @@ class BoardSlotComponent extends PositionComponent {
   BoardSlotComponent({required this.boardIndex})
     : super(anchor: Anchor.topLeft, priority: 1);
 
+  static final Paint _fillPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..color = const Color.fromARGB(77, 111, 126, 111);
+
   final int boardIndex;
 
   void setHovered(bool value) {
@@ -16,10 +20,6 @@ class BoardSlotComponent extends PositionComponent {
   void render(Canvas canvas) {
     super.render(canvas);
 
-    final Paint fillPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = const Color.fromARGB(77, 111, 126, 111);
-
-    canvas.drawRect(size.toRect(), fillPaint);
+    canvas.drawRect(size.toRect(), _fillPaint);
   }
 }

@@ -19,10 +19,6 @@ class TileComponent extends SpriteComponent with DragCallbacks {
   final void Function(Vector2 delta) onDragDeltaRequested;
   final void Function() onDragEndRequested;
 
-  bool _showTopBorder = true;
-  bool _showRightBorder = true;
-  bool _showBottomBorder = true;
-  bool _showLeftBorder = true;
   bool _roundTopLeft = false;
   bool _roundTopRight = false;
   bool _roundBottomRight = false;
@@ -54,10 +50,6 @@ class TileComponent extends SpriteComponent with DragCallbacks {
     required bool roundBottomLeft,
     required bool showDragPlaceholder,
   }) {
-    _showTopBorder = showTopBorder;
-    _showRightBorder = showRightBorder;
-    _showBottomBorder = showBottomBorder;
-    _showLeftBorder = showLeftBorder;
     _roundTopLeft = roundTopLeft;
     _roundTopRight = roundTopRight;
     _roundBottomRight = roundBottomRight;
@@ -108,46 +100,5 @@ class TileComponent extends SpriteComponent with DragCallbacks {
     canvas.clipRRect(tileShape);
     super.render(canvas);
     canvas.restore();
-
-    final Paint borderPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..color = const Color(0x00000000);
-
-    final double width = size.x;
-    final double height = size.y;
-    final double topLeftInset = _roundTopLeft ? _cornerRadius : 0;
-    final double topRightInset = _roundTopRight ? _cornerRadius : 0;
-    final double bottomRightInset = _roundBottomRight ? _cornerRadius : 0;
-    final double bottomLeftInset = _roundBottomLeft ? _cornerRadius : 0;
-
-    if (_showTopBorder) {
-      canvas.drawLine(
-        Offset(topLeftInset, 0),
-        Offset(width - topRightInset, 0),
-        borderPaint,
-      );
-    }
-    if (_showRightBorder) {
-      canvas.drawLine(
-        Offset(width, topRightInset),
-        Offset(width, height - bottomRightInset),
-        borderPaint,
-      );
-    }
-    if (_showBottomBorder) {
-      canvas.drawLine(
-        Offset(bottomLeftInset, height),
-        Offset(width - bottomRightInset, height),
-        borderPaint,
-      );
-    }
-    if (_showLeftBorder) {
-      canvas.drawLine(
-        Offset(0, topLeftInset),
-        Offset(0, height - bottomLeftInset),
-        borderPaint,
-      );
-    }
   }
 }

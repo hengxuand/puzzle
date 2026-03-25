@@ -67,31 +67,43 @@ extension PuzzleWorldComponentGeometry on PuzzleWorldComponent {
     required bool connectBottom,
     required bool connectLeft,
   }) {
-    final Vector2 position = _positionForBoardIndex(boardIndex).clone();
-    final Vector2 size = Vector2(_tileWidth, _tileHeight);
+    final int row = boardIndex ~/ _columns;
+    final int col = boardIndex % _columns;
+    final double step = PuzzleWorldComponent._spacing;
+    double px = _boardOriginX + col * (_tileWidth + step);
+    double py = _boardOriginY + row * (_tileHeight + step);
+    double sx = _tileWidth;
+    double sy = _tileHeight;
     final double overlap =
-        PuzzleWorldComponent._spacing / 2 +
-        PuzzleWorldComponent._connectedSeamEpsilon;
+        step / 2 + PuzzleWorldComponent._connectedSeamEpsilon;
 
     if (connectLeft) {
-      position.x -= overlap;
-      size.x += overlap;
+      px -= overlap;
+      sx += overlap;
     }
     if (connectRight) {
-      size.x += overlap;
+      sx += overlap;
     }
     if (connectTop) {
-      position.y -= overlap;
-      size.y += overlap;
+      py -= overlap;
+      sy += overlap;
     }
     if (connectBottom) {
-      size.y += overlap;
+      sy += overlap;
     }
 
-    return _TileRenderGeometry(position: position, size: size);
+    return _TileRenderGeometry(
+      position: Vector2(px, py),
+      size: Vector2(sx, sy),
+    );
   }
 
   Sprite _spriteForPiece(int pieceIndex) {
+    final Sprite? cached = _spriteCache[pieceIndex];
+    if (cached != null) {
+      return cached;
+    }
+
     final ui.Image image = _image!;
 
     final int row = pieceIndex ~/ _columns;
@@ -100,11 +112,13 @@ extension PuzzleWorldComponentGeometry on PuzzleWorldComponent {
     final double sourceTileWidth = image.width / _columns;
     final double sourceTileHeight = image.height / _rows;
 
-    return Sprite(
+    final Sprite sprite = Sprite(
       image,
       srcPosition: Vector2(col * sourceTileWidth, row * sourceTileHeight),
       srcSize: Vector2(sourceTileWidth, sourceTileHeight),
     );
+    _spriteCache[pieceIndex] = sprite;
+    return sprite;
   }
 
   Vector2 _positionForBoardIndex(int boardIndex) {

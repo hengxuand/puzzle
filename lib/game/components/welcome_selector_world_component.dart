@@ -27,17 +27,58 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   final bool Function(int levelId) isLocked;
   final bool Function(int levelId) isCompleted;
 
-  static const double _cardWidthFactor = 0.78;
-  static const double _cardHeightFactor = 0.84;
+  static const double _cardWidthFactor = 0.88;
+  static const double _cardHeightFactor = 0.92;
   static const double _cardSpacingFactor = 0.98;
-  static const double _levelRowHeight = 85;
+  static const double _levelRowHeight = 90;
   static const double _snapSettleSpeed = 16.0;
   static const double _snapThresholdFactor = 0.13;
+  static const int _thumbnailDecodeWidth = 120;
+  static const int _thumbnailDecodeHeight = 140;
+  static const int _maxTextPainterCacheEntries = 320;
+
+  static const ColorFilter _grayscaleColorFilter = ColorFilter.matrix(<double>[
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ]);
 
   List<LevelGroup> _groups = <LevelGroup>[];
   Map<int, List<GameLevel>> _sortedLevelsByGroup = <int, List<GameLevel>>{};
   final Map<int, double> _verticalScrollOffsets = <int, double>{};
   final Map<String, ui.Image> _imageCache = <String, ui.Image>{};
+  final Map<String, Future<ui.Image?>> _thumbnailLoadFutures =
+      <String, Future<ui.Image?>>{};
+  final Map<int, bool> _lockedByLevelId = <int, bool>{};
+  final Map<int, bool> _completedByLevelId = <int, bool>{};
+  final Map<int, int> _completedLevelCountByGroup = <int, int>{};
+  final Map<int, int> _totalLevelCountByGroup = <int, int>{};
+  final Map<String, TextPainter> _textPainterCache = <String, TextPainter>{};
+
+  final Paint _plainImagePaint = Paint();
+  final Paint _lockedThumbnailPaint = Paint()
+    ..colorFilter = _grayscaleColorFilter;
+
+  // Reusable paints to avoid per-frame allocations in render.
+  final Paint _reusableFillPaint = Paint();
+  final Paint _reusableStrokePaint = Paint()..style = PaintingStyle.stroke;
 
   int _activeIndex = 0;
   int? _selectedLevelId;
@@ -108,6 +149,28 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         group.id: (group.levels.values.toList(growable: false)
           ..sort((a, b) => a.id.compareTo(b.id))),
     };
+
+    _lockedByLevelId.clear();
+    _completedByLevelId.clear();
+    _completedLevelCountByGroup.clear();
+    _totalLevelCountByGroup.clear();
+
+    for (final LevelGroup group in groups) {
+      final List<GameLevel> levels =
+          _sortedLevelsByGroup[group.id] ?? const <GameLevel>[];
+      int completedCount = 0;
+      for (final GameLevel level in levels) {
+        final bool locked = isLocked(level.id);
+        final bool completed = isCompleted(level.id);
+        _lockedByLevelId[level.id] = locked;
+        _completedByLevelId[level.id] = completed;
+        if (completed) {
+          completedCount++;
+        }
+      }
+      _completedLevelCountByGroup[group.id] = completedCount;
+      _totalLevelCountByGroup[group.id] = levels.length;
+    }
 
     for (final LevelGroup group in groups) {
       _verticalScrollOffsets[group.id] ??= 0;
@@ -349,9 +412,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   }
 
   Rect _levelsViewportRect(Rect cardRect) {
-    final double horizontalPadding = math.max(16, cardRect.width * 0.055);
-    final double topInset = math.max(100, cardRect.height * 0.08);
-    final double bottomInset = math.max(20, cardRect.height * 0.08);
+    final double horizontalPadding = math.max(12, cardRect.width * 0.04);
+    final double topInset = math.max(96, cardRect.height * 0.08);
+    final double bottomInset = math.max(32, cardRect.height * 0.05);
     final double width = math.max(1, cardRect.width - (horizontalPadding * 2));
     final double height = math.max(1, cardRect.height - topInset - bottomInset);
     // Log the dimensions of the levels viewport rect
@@ -486,42 +549,21 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       const Radius.circular(8),
     );
 
-    final Paint shadowPaint = Paint()
-      ..color = Color.fromARGB((56 * alphaFactor).round(), 27, 36, 52);
-    canvas.drawRRect(cardShape.shift(const Offset(0, 6)), shadowPaint);
+    _reusableFillPaint
+      ..shader = null
+      ..colorFilter = null
+      ..color = Color.fromARGB((40 * alphaFactor).round(), 60, 60, 80);
+    canvas.drawRRect(cardShape.shift(const Offset(0, 4)), _reusableFillPaint);
 
-    final Paint cardFill = Paint()
-      ..shader = ui.Gradient.linear(
-        Offset(animatedRect.left, animatedRect.top),
-        Offset(animatedRect.right, animatedRect.bottom),
-        <Color>[
-          Color.lerp(
-                Color.fromARGB(alpha, 243, 238, 230),
-                Color.fromARGB(alpha, 251, 239, 218),
-                focusStrength,
-              ) ??
-              Color.fromARGB(alpha, 243, 238, 230),
-          Color.lerp(
-                Color.fromARGB(alpha, 231, 227, 220),
-                Color.fromARGB(alpha, 240, 225, 196),
-                focusStrength,
-              ) ??
-              Color.fromARGB(alpha, 231, 227, 220),
-        ],
-      );
-    final Paint cardBorder = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = ui.lerpDouble(1.4, 2.6, focusStrength) ?? 2
-      ..color =
-          Color.lerp(
-            Color.fromARGB(alpha, 76, 94, 122),
-            Color.fromARGB(alpha, 132, 68, 32),
-            focusStrength,
-          ) ??
-          Color.fromARGB(alpha, 76, 94, 122);
+    _reusableFillPaint
+      ..shader = null
+      ..color = Color.fromARGB(alpha, 255, 255, 255);
+    canvas.drawRRect(cardShape, _reusableFillPaint);
 
-    canvas.drawRRect(cardShape, cardFill);
-    canvas.drawRRect(cardShape, cardBorder);
+    _reusableStrokePaint
+      ..strokeWidth = ui.lerpDouble(1.0, 1.6, focusStrength) ?? 1.2
+      ..color = Color.fromARGB((alpha * 0.25).round(), 80, 100, 130);
+    canvas.drawRRect(cardShape, _reusableStrokePaint);
 
     final Rect headerRect = Rect.fromLTWH(
       animatedRect.left + 16,
@@ -535,8 +577,8 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       text: group.name,
       rect: headerRect,
       style: TextStyle(
-        fontSize: ui.lerpDouble(22, 28, focusStrength) ?? 24,
-        color: const Color(0xFF241B14),
+        fontSize: ui.lerpDouble(22, 26, focusStrength) ?? 24,
+        color: const Color(0xFF1A2B3C),
         fontWeight: FontWeight.w800,
       ),
     );
@@ -553,7 +595,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       rect: descriptionRect,
       style: TextStyle(
         fontSize: ui.lerpDouble(12.5, 14, focusStrength) ?? 13,
-        color: const Color(0xFF3A4B61),
+        color: const Color(0xFF5A6A7A),
         fontWeight: FontWeight.w500,
       ),
       maxLines: 2,
@@ -564,18 +606,10 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       listRect,
       const Radius.circular(8),
     );
-    canvas.drawRRect(
-      listShape,
-      Paint()
-        ..shader = ui.Gradient.linear(
-          Offset(listRect.left, listRect.top),
-          Offset(listRect.right, listRect.bottom),
-          <Color>[
-            Color.fromARGB(alpha, 251, 248, 241),
-            Color.fromARGB(alpha, 243, 238, 228),
-          ],
-        ),
-    );
+    _reusableFillPaint
+      ..shader = null
+      ..color = Color.fromARGB(alpha, 245, 247, 250);
+    canvas.drawRRect(listShape, _reusableFillPaint);
 
     canvas.save();
     canvas.clipRRect(listShape);
@@ -595,18 +629,20 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         20,
       ),
       style: const TextStyle(
-        fontSize: 12,
-        color: Color(0xFF55667D),
-        fontWeight: FontWeight.w600,
+        fontSize: 11,
+        color: Color(0xFF8899AA),
+        fontWeight: FontWeight.w500,
       ),
       textAlign: TextAlign.center,
     );
 
     final int totalLevels =
+        _totalLevelCountByGroup[group.id] ??
         (_sortedLevelsByGroup[group.id] ?? const <GameLevel>[]).length;
     final int completedLevels =
+        _completedLevelCountByGroup[group.id] ??
         (_sortedLevelsByGroup[group.id] ?? const <GameLevel>[])
-            .where((level) => isCompleted(level.id))
+            .where((level) => _completedByLevelId[level.id] ?? false)
             .length;
     _drawSingleLineText(
       canvas,
@@ -618,9 +654,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         18,
       ),
       style: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF4A5E78),
-        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        color: Color(0xFF8899AA),
+        fontWeight: FontWeight.w600,
       ),
       textAlign: TextAlign.right,
     );
@@ -670,26 +706,28 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         _levelRowHeight - 10,
       );
 
-      final bool locked = isLocked(level.id);
-      final bool completed = isCompleted(level.id);
+      final bool locked = _lockedByLevelId[level.id] ?? isLocked(level.id);
+      final bool completed =
+          _completedByLevelId[level.id] ?? isCompleted(level.id);
       final bool selected = _selectedLevelId == level.id;
 
       final Color rowColor = selected
-          ? const Color(0xFFF4D9A9)
-          : (locked ? const Color(0xFFECECEC) : const Color(0xFFF9F6EF));
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(4)),
-        Paint()..color = rowColor.withAlpha(alpha),
+          ? const Color(0xFFE8F0FE)
+          : (locked ? const Color(0xFFF0F0F2) : const Color(0xFFFFFFFF));
+      final RRect rowShape = RRect.fromRectAndRadius(
+        rowRect,
+        const Radius.circular(8),
       );
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(rowRect, const Radius.circular(4)),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1
-          ..color =
-              (selected ? const Color(0xFF9C6936) : const Color(0xFFD0C7B8))
-                  .withAlpha(alpha),
-      );
+      _reusableFillPaint
+        ..shader = null
+        ..colorFilter = null
+        ..color = rowColor.withAlpha(alpha);
+      canvas.drawRRect(rowShape, _reusableFillPaint);
+      _reusableStrokePaint
+        ..strokeWidth = 1
+        ..color = (selected ? const Color(0xFF4A90D9) : const Color(0xFFDDE1E6))
+            .withAlpha(alpha);
+      canvas.drawRRect(rowShape, _reusableStrokePaint);
 
       final String leading = locked ? 'LOCK' : (completed ? 'DONE' : 'PLAY');
 
@@ -707,29 +745,6 @@ class WelcomeSelectorWorldComponent extends PositionComponent
 
         // Apply grayscale filter for locked levels
         if (locked) {
-          final Paint grayscalePaint = Paint()
-            ..colorFilter = const ColorFilter.matrix(<double>[
-              0.2126,
-              0.7152,
-              0.0722,
-              0,
-              0,
-              0.2126,
-              0.7152,
-              0.0722,
-              0,
-              0,
-              0.2126,
-              0.7152,
-              0.0722,
-              0,
-              0,
-              0,
-              0,
-              0,
-              1,
-              0,
-            ]);
           canvas.drawImageRect(
             thumbnail,
             Rect.fromLTWH(
@@ -739,7 +754,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
               thumbnail.height.toDouble(),
             ),
             thumbnailRect,
-            grayscalePaint,
+            _lockedThumbnailPaint,
           );
         } else {
           canvas.drawImageRect(
@@ -751,7 +766,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
               thumbnail.height.toDouble(),
             ),
             thumbnailRect,
-            Paint(),
+            _plainImagePaint,
           );
         }
       } else {
@@ -759,7 +774,9 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         _loadThumbnail(thumbnailPath);
 
         // Draw placeholder
-        final Paint placeholderPaint = Paint()
+        _reusableFillPaint
+          ..shader = null
+          ..colorFilter = null
           ..color = locked ? const Color(0xFFE0E0E0) : const Color(0xFFF0F0F0);
         canvas.drawRRect(
           RRect.fromRectAndRadius(
@@ -771,71 +788,55 @@ class WelcomeSelectorWorldComponent extends PositionComponent
             ),
             const Radius.circular(4),
           ),
-          placeholderPaint,
+          _reusableFillPaint,
         );
       }
+
+      // Layout constants for text columns
+      final double textLeft = rowRect.left + 82;
+      final double statusWidth = 48;
+      final double textWidth = rowRect.width - 82 - statusWidth - 8;
 
       final String subtitle = level.difficulty.displaySize;
       _drawSingleLineText(
         canvas,
         text: level.name,
-        rect: Rect.fromLTWH(
-          rowRect.left + 108,
-          rowRect.top + 6,
-          rowRect.width - 118,
-          21,
-        ),
-        style: const TextStyle(
+        rect: Rect.fromLTWH(textLeft, rowRect.top + 12, textWidth, 20),
+        style: TextStyle(
           fontSize: 14,
-          color: Color(0xFF213147),
+          color: locked ? const Color(0xFF8899AA) : const Color(0xFF1A2B3C),
           fontWeight: FontWeight.w700,
         ),
       );
       _drawSingleLineText(
         canvas,
         text: subtitle,
-        rect: Rect.fromLTWH(
-          rowRect.left + 108,
-          rowRect.top + 32,
-          rowRect.width - 118,
-          18,
-        ),
-        style: const TextStyle(
+        rect: Rect.fromLTWH(textLeft, rowRect.top + 36, textWidth, 18),
+        style: TextStyle(
           fontSize: 12,
-          color: Color(0xFF57667A),
-          fontWeight: FontWeight.w600,
+          color: locked ? const Color(0xFFAAB4BE) : const Color(0xFF5A6A7A),
+          fontWeight: FontWeight.w500,
         ),
       );
       _drawSingleLineText(
         canvas,
         text: leading,
-        rect: Rect.fromLTWH(rowRect.right - 38, rowRect.top + 8, 50, 18),
-        style: TextStyle(
-          fontSize: 10,
-          color: locked
-              ? const Color(0xFF7A7A7A)
-              : (completed ? const Color(0xFF2D7D54) : const Color(0xFF7A4E24)),
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.7,
+        rect: Rect.fromLTWH(
+          rowRect.right - statusWidth - 4,
+          rowRect.top + (rowRect.height - 18) / 2,
+          statusWidth,
+          18,
         ),
+        style: TextStyle(
+          fontSize: 11,
+          color: locked
+              ? const Color(0xFFAAB0B8)
+              : (completed ? const Color(0xFF2E8B57) : const Color(0xFF4A90D9)),
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.5,
+        ),
+        textAlign: TextAlign.center,
       );
-      if (!locked) {
-        _drawSingleLineText(
-          canvas,
-          text: '>',
-          rect: Rect.fromLTWH(
-            rowRect.right - 28,
-            rowRect.top + (rowRect.height - 24) / 2,
-            20,
-            24,
-          ),
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF5B6D84),
-            fontWeight: FontWeight.w700,
-          ),
-        );
-      }
     }
 
     final double maxScroll = _maxVerticalScrollForGroup(group.id);
@@ -851,9 +852,13 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         3,
         thumbHeight,
       );
+      _reusableFillPaint
+        ..shader = null
+        ..colorFilter = null
+        ..color = const Color(0x8876879A);
       canvas.drawRRect(
         RRect.fromRectAndRadius(thumbRect, const Radius.circular(3)),
-        Paint()..color = const Color(0x8876879A),
+        _reusableFillPaint,
       );
     }
   }
@@ -871,13 +876,16 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     for (int i = 0; i < _groups.length; i++) {
       final double t = (1 - (i - _visualFocusIndex).abs()).clamp(0, 1);
       final double radius = ui.lerpDouble(3.0, 4.4, t) ?? 3.0;
+      _reusableFillPaint
+        ..shader = null
+        ..colorFilter = null
+        ..color =
+            Color.lerp(const Color(0x66A0B0C0), const Color(0xFF4A90D9), t) ??
+            const Color(0x66A0B0C0);
       canvas.drawCircle(
         Offset(startX + (i * spacing), y),
         radius,
-        Paint()
-          ..color =
-              Color.lerp(const Color(0x8894A4B8), const Color(0xFF815327), t) ??
-              const Color(0x8894A4B8),
+        _reusableFillPaint,
       );
     }
   }
@@ -903,12 +911,13 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     required TextStyle style,
     int maxLines = 2,
   }) {
-    final TextPainter painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
+    final TextPainter painter = _obtainTextPainter(
+      text: text,
+      style: style,
+      maxWidth: rect.width,
       maxLines: maxLines,
-      ellipsis: '...',
-    )..layout(maxWidth: rect.width);
+      textAlign: TextAlign.left,
+    );
 
     painter.paint(canvas, Offset(rect.left, rect.top));
   }
@@ -920,13 +929,13 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     required TextStyle style,
     TextAlign textAlign = TextAlign.left,
   }) {
-    final TextPainter painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
+    final TextPainter painter = _obtainTextPainter(
+      text: text,
+      style: style,
+      maxWidth: rect.width,
       maxLines: 1,
-      ellipsis: '...',
       textAlign: textAlign,
-    )..layout(maxWidth: rect.width);
+    );
 
     final double dx;
     switch (textAlign) {
@@ -947,22 +956,90 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     painter.paint(canvas, Offset(dx, rect.top));
   }
 
+  TextPainter _obtainTextPainter({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required int maxLines,
+    required TextAlign textAlign,
+  }) {
+    final double normalizedWidth = math.max(1, maxWidth);
+    final String key = _textPainterKey(
+      text: text,
+      style: style,
+      maxWidth: normalizedWidth,
+      maxLines: maxLines,
+      textAlign: textAlign,
+    );
+    final TextPainter? cached = _textPainterCache[key];
+    if (cached != null) {
+      return cached;
+    }
+
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: TextDirection.ltr,
+      maxLines: maxLines,
+      ellipsis: '...',
+      textAlign: textAlign,
+    )..layout(maxWidth: normalizedWidth);
+
+    if (_textPainterCache.length >= _maxTextPainterCacheEntries) {
+      _textPainterCache.clear();
+    }
+    _textPainterCache[key] = painter;
+    return painter;
+  }
+
+  String _textPainterKey({
+    required String text,
+    required TextStyle style,
+    required double maxWidth,
+    required int maxLines,
+    required TextAlign textAlign,
+  }) {
+    return '$text|${maxWidth.round()}|$maxLines|${textAlign.index}|'
+        '${style.fontSize?.toStringAsFixed(2) ?? ''}|${style.fontWeight?.value ?? 0}|'
+        '${style.letterSpacing?.toStringAsFixed(2) ?? ''}|${style.height?.toStringAsFixed(2) ?? ''}|'
+        '${style.color?.toARGB32() ?? 0}|${style.fontStyle?.index ?? 0}';
+  }
+
   Future<ui.Image?> _loadThumbnail(String assetPath) async {
     if (_imageCache.containsKey(assetPath)) {
       return _imageCache[assetPath];
     }
 
-    try {
-      final ByteData data = await rootBundle.load(assetPath);
-      final Uint8List bytes = data.buffer.asUint8List();
-      final ui.Codec codec = await ui.instantiateImageCodec(bytes);
-      final ui.FrameInfo frameInfo = await codec.getNextFrame();
-      final ui.Image image = frameInfo.image;
-      _imageCache[assetPath] = image;
-      return image;
-    } catch (e) {
-      _log.warning('Failed to load thumbnail: $assetPath', e);
-      return null;
+    final Future<ui.Image?>? pending = _thumbnailLoadFutures[assetPath];
+    if (pending != null) {
+      return pending;
     }
+
+    final Future<ui.Image?> loadFuture = () async {
+      try {
+        final ByteData data = await rootBundle.load(assetPath);
+        final ui.Codec codec = await ui.instantiateImageCodec(
+          data.buffer.asUint8List(),
+          targetWidth: _thumbnailDecodeWidth,
+          targetHeight: _thumbnailDecodeHeight,
+        );
+
+        try {
+          final ui.FrameInfo frameInfo = await codec.getNextFrame();
+          final ui.Image image = frameInfo.image;
+          _imageCache[assetPath] = image;
+          return image;
+        } finally {
+          codec.dispose();
+        }
+      } catch (e) {
+        _log.warning('Failed to load thumbnail: $assetPath', e);
+        return null;
+      } finally {
+        _thumbnailLoadFutures.remove(assetPath);
+      }
+    }();
+
+    _thumbnailLoadFutures[assetPath] = loadFuture;
+    return loadFuture;
   }
 }

@@ -1,12 +1,9 @@
 import 'dart:math';
 
-import 'package:logging/logging.dart';
-
 class PuzzleLogic {
   PuzzleLogic() : _random = Random();
 
   final Random _random;
-  static final Logger _logger = Logger('PuzzleLogic');
 
   List<int> createShuffledTiles({required int rows, required int columns}) {
     final List<int> tiles = List<int>.generate(rows * columns, (i) => i);
@@ -22,10 +19,8 @@ class PuzzleLogic {
   }
 
   bool isSolved(List<int> tiles) {
-    _logger.fine('Checking if solved: $tiles');
     for (int i = 0; i < tiles.length; i++) {
       if (tiles[i] != i) {
-        _logger.fine('Not solved!!');
         return false;
       }
     }

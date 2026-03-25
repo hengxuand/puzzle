@@ -31,6 +31,7 @@ class PuzzleWorldComponent extends Component {
   final Map<int, BoardSlotComponent> _slotsByIndex =
       <int, BoardSlotComponent>{};
   final Map<int, TileComponent> _tilesByPiece = <int, TileComponent>{};
+  final Map<int, Sprite> _spriteCache = <int, Sprite>{};
 
   List<int> _tiles = const <int>[];
   Set<int> _dragMemberIndices = <int>{};
@@ -78,6 +79,9 @@ class PuzzleWorldComponent extends Component {
         _columns != nextColumns ||
         _tiles.length != nextTiles.length;
     final bool imageChanged = !identical(image, _image);
+    if (imageChanged) {
+      _spriteCache.clear();
+    }
 
     _rows = nextRows;
     _columns = nextColumns;

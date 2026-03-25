@@ -6,15 +6,27 @@ import 'package:puzzle/game/puzzle_flame_game.dart';
 import 'package:puzzle/page/welcome.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
-class GamePage extends StatelessWidget {
+class GamePage extends StatefulWidget {
   const GamePage({super.key});
+
+  @override
+  State<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends State<GamePage> {
+  late final PuzzleGameController gameController;
+  late final PuzzleFlameGame flameGame;
+
+  @override
+  void initState() {
+    super.initState();
+    gameController = Get.find<PuzzleGameController>();
+    flameGame = PuzzleFlameGame(controller: gameController);
+  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-
-    final gameController = Get.find<PuzzleGameController>();
-    late final flameGame = PuzzleFlameGame(controller: gameController);
 
     return Scaffold(
       backgroundColor: AppConfig.backgroundColor,

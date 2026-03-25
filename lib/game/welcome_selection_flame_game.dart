@@ -1,10 +1,10 @@
 import 'dart:ui' as ui;
 
 import 'package:flame/game.dart';
+import 'package:get/get.dart';
 import 'package:puzzle/config/app_config.dart';
 import 'package:puzzle/game/components/welcome_selector_world_component.dart';
 import 'package:puzzle/models/level_group.dart';
-import 'package:puzzle/models/level_progress_status.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
 
 class WelcomeSelectionFlameGame extends FlameGame {
@@ -13,7 +13,8 @@ class WelcomeSelectionFlameGame extends FlameGame {
   final PuzzleGameController controller;
 
   WelcomeSelectorWorldComponent? _world;
-  String _lastStateKey = '';
+  Worker? _stateWorker;
+  bool _stateDirty = true;
 
   @override
   ui.Color backgroundColor() => AppConfig.backgroundColor;
@@ -21,13 +22,29 @@ class WelcomeSelectionFlameGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    _stateWorker ??= everAll(<RxInterface<dynamic>>[
+      controller.progressSnapshot,
+      controller.selectedGroupId,
+      controller.selectedLevel,
+    ], (_) => _stateDirty = true);
     _syncState(force: true);
+    _stateDirty = false;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
-    _syncState();
+    if (_stateDirty) {
+      _syncState();
+      _stateDirty = false;
+    }
+  }
+
+  @override
+  void onRemove() {
+    _stateWorker?.dispose();
+    _stateWorker = null;
+    super.onRemove();
   }
 
   void _syncState({bool force = false}) {
@@ -43,12 +60,6 @@ class WelcomeSelectionFlameGame extends FlameGame {
             }
             return a.id.compareTo(b.id);
           });
-
-    final String stateKey = _buildStateKey(groups);
-    if (!force && stateKey == _lastStateKey) {
-      return;
-    }
-    _lastStateKey = stateKey;
 
     final WelcomeSelectorWorldComponent world = _world ??=
         WelcomeSelectorWorldComponent(
@@ -67,20 +78,5 @@ class WelcomeSelectionFlameGame extends FlameGame {
       selectedGroupId: controller.selectedGroupId.value,
       selectedLevelId: controller.selectedLevel.value?.id,
     );
-  }
-
-  String _buildStateKey(List<LevelGroup> groups) {
-    final String groupsKey = groups
-        .map((group) {
-          final levels = group.levels.values.toList(growable: false)
-            ..sort((a, b) => a.id.compareTo(b.id));
-          final String levelsKey = levels
-              .map((level) => '${level.id}:${level.status.wireValue}')
-              .join(',');
-          return '${group.id}[$levelsKey]';
-        })
-        .join('|');
-
-    return '${controller.selectedGroupId.value ?? -1}:${controller.selectedLevel.value?.id ?? -1}:$groupsKey';
   }
 }

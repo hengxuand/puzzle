@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:puzzle/config/app_config.dart';
 import 'package:puzzle/game/welcome_selection_flame_game.dart';
 import 'package:puzzle/models/game_level.dart';
-import 'package:puzzle/models/level_group.dart';
 import 'package:puzzle/page/game.dart';
 import 'package:puzzle/page/widgets/reset_levels_button.dart';
 import 'package:puzzle/state/game/puzzle_game_controller.dart';
@@ -38,20 +37,11 @@ class _WelcomePageState extends State<WelcomePage> {
             final GameLevel? selectedLevel =
                 puzzleController.selectedLevel.value;
 
-            final List<LevelGroup> groups =
-                (puzzleController.progressSnapshot.value?.groups.values.toList(
-                        growable: false,
-                      ) ??
-                      <LevelGroup>[])
-                  ..sort((a, b) {
-                    final int byOrder = a.order.compareTo(b.order);
-                    if (byOrder != 0) {
-                      return byOrder;
-                    }
-                    return a.id.compareTo(b.id);
-                  });
+            final bool hasGroups =
+                (puzzleController.progressSnapshot.value?.groups.isNotEmpty ??
+                false);
 
-            if (groups.isEmpty) {
+            if (!hasGroups) {
               return const SizedBox.shrink();
             }
 
@@ -62,15 +52,15 @@ class _WelcomePageState extends State<WelcomePage> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
                 const Text(
                   'Story Puzzle',
-                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 4),
                 Text(
                   'Choose a story to start your puzzle adventure!',
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Expanded(
                   child: Padding(
@@ -81,7 +71,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: selectedLevel == null
                       ? null
@@ -93,7 +83,7 @@ class _WelcomePageState extends State<WelcomePage> {
                           Get.to(() => GamePage());
                         },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Text(
                       isSelectedLevelCompleted
                           ? 'View the puzzle'
@@ -104,7 +94,7 @@ class _WelcomePageState extends State<WelcomePage> {
                 ),
                 if (kDebugMode)
                   ResetLevelsButton(puzzleController: puzzleController),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
               ],
             );
           }),

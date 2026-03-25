@@ -25,7 +25,10 @@ extension PuzzleGameControllerBoard on PuzzleGameController {
       return false;
     }
     final List<int> members = clusterMembersForId(clusterId);
-    return members.contains(boardIndex);
+    if (members.length <= 8) {
+      return members.contains(boardIndex);
+    }
+    return members.toSet().contains(boardIndex);
   }
 
   bool canAcceptClusterDrop({
