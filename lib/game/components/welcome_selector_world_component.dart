@@ -28,7 +28,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
   final bool Function(int levelId) isCompleted;
 
   static const double _cardWidthFactor = 0.88;
-  static const double _cardHeightFactor = 0.92;
+  static const double _cardHeightFactor = 0.86;
   static const double _cardSpacingFactor = 0.98;
   static const double _levelRowHeight = 90;
   static const double _snapSettleSpeed = 16.0;
@@ -417,15 +417,6 @@ class WelcomeSelectorWorldComponent extends PositionComponent
     final double bottomInset = math.max(32, cardRect.height * 0.05);
     final double width = math.max(1, cardRect.width - (horizontalPadding * 2));
     final double height = math.max(1, cardRect.height - topInset - bottomInset);
-    // Log the dimensions of the levels viewport rect
-    // _log.fine(
-    //   'Levels viewport rect: '
-    //   'horizontalPadding=${horizontalPadding.toStringAsFixed(2)}, '
-    //   'topInset=${topInset.toStringAsFixed(2)}, '
-    //   'bottomInset=${bottomInset.toStringAsFixed(2)}, '
-    //   'width=${width.toStringAsFixed(2)}, '
-    //   'height=${height.toStringAsFixed(2)}',
-    // );
 
     return Rect.fromLTWH(
       cardRect.left + horizontalPadding,
@@ -868,7 +859,7 @@ class WelcomeSelectorWorldComponent extends PositionComponent
       return;
     }
 
-    final double y = size.y - 15;
+    final double y = size.y - 14;
     final double spacing = 13;
     final double totalWidth = ((_groups.length - 1) * spacing) + 10;
     final double startX = (size.x - totalWidth) / 2;
@@ -880,7 +871,11 @@ class WelcomeSelectorWorldComponent extends PositionComponent
         ..shader = null
         ..colorFilter = null
         ..color =
-            Color.lerp(const Color(0x66A0B0C0), const Color(0xFF4A90D9), t) ??
+            Color.lerp(
+              const ui.Color.fromARGB(102, 20, 108, 196),
+              const Color(0xFF4A90D9),
+              t,
+            ) ??
             const Color(0x66A0B0C0);
       canvas.drawCircle(
         Offset(startX + (i * spacing), y),

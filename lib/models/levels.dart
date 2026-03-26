@@ -115,5 +115,33 @@ class Levels {
         ),
       },
     ),
+    LevelGroup(
+      id: 2,
+      name: 'San Guo Yan Yi',
+      description: 'Romance of the Three Kingdoms',
+      order: 1,
+      levels: <int, GameLevel>{
+        11: GameLevel(
+          id: 11,
+          groupId: 2,
+          name: 'The Oath of the Peach Garden',
+          description: 'The Oath of the Peach Garden',
+          difficulty: PuzzleDifficulty.easy,
+          imageAssetPath: 'assets/images/levels/sanguo-level-1.png',
+          thumbnailAssetPath: 'assets/images/levels/sanguo-level-1.png',
+          status: LevelProgressStatus.unlocked,
+        ),
+        12: GameLevel(
+          id: 12,
+          groupId: 2,
+          name: 'The Battle of Hulao Pass',
+          description: 'The Battle of Hulao Pass',
+          difficulty: PuzzleDifficulty.easy,
+          imageAssetPath: 'assets/images/levels/sanguo-level-2.png',
+          thumbnailAssetPath: 'assets/images/levels/sanguo-level-2.png',
+          status: LevelProgressStatus.locked,
+        ),
+      },
+    ),
   ];
 }
