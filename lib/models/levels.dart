@@ -103,6 +103,16 @@ class Levels {
           thumbnailAssetPath: 'assets/images/levels/xiyouji-level-9.png',
           status: LevelProgressStatus.locked,
         ),
+        10: GameLevel(
+          id: 10,
+          groupId: 1,
+          name: 'Meeting Zhu Bajie',
+          description: 'Meeting Zhu Bajie',
+          difficulty: PuzzleDifficulty.easy,
+          imageAssetPath: 'assets/images/levels/xiyouji-level-10.png',
+          thumbnailAssetPath: 'assets/images/levels/xiyouji-level-10.png',
+          status: LevelProgressStatus.locked,
+        ),
       },
     ),
   ];
